@@ -4,6 +4,7 @@
 
 # python
 .ipynb_checkpoints
+__pycache__
 
 # AI
 AI/Teoria
