@@ -97,33 +97,35 @@ class Aichess():
         else:
             return False
 
-    def isCheckMate(self, mystate):
 
+
+    def isCheckMate(self, mystate):
+        pass
         # Your Code
         
         
         
 
     def DepthFirstSearch(self, currentState, depth):
-    
+        pass
         # Your Code here
 
 
  
     def BreadthFirstSearch(self, currentState):
-            
+        pass   
         # Your Code here
 
 
 
     def BestFirstSearch(self, currentState):
-            
+        pass
         # Your Code here
                 
                 
                 
     def AStarSearch(self, currentState):
-            
+        pass
         # Your Code here
         
         
