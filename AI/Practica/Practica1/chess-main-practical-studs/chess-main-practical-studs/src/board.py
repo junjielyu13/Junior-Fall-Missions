@@ -498,12 +498,12 @@ class Board():
         Prints the current state of the board.
         """
 
-        buffer = ""
+        buffer = "  "
         for i in range(33):
             buffer += "*"
         print(buffer)
         for i in range(len(self.board)):
-            tmp_str = "|"
+            tmp_str = f"{i} |"
             for j in self.board[i]:
                 if j == None or j.name == 'GP':
                     tmp_str += "   |"
@@ -512,7 +512,11 @@ class Board():
                 else:
                     tmp_str += (" " + str(j) + " |")
             print(tmp_str)
-        buffer = ""
+        buffer = "  "
         for i in range(33):
             buffer += "*"
+        print(buffer)
+        buffer = "  "
+        for i in range(8):
+            buffer += f"  {i} "
         print(buffer)
