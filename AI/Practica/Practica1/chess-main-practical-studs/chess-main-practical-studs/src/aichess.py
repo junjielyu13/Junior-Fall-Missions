@@ -49,7 +49,8 @@ class Aichess():
         self.currentStateW = self.chess.boardSim.currentStateW;
         self.depthMax = 8;
         self.checkMate = False
-
+        self.checkMateList = [[[0, 0, 2], [2, 4, 6]], [[0, 1, 2], [2, 4, 6]], [[0, 2, 2], [2, 4, 6]], [[0, 3, 2],
+                               [2, 4, 6]],[[0, 5, 2], [2, 4, 6]], [[0, 6, 2], [2, 4, 6]], [[0, 7, 2], [2, 4, 6]]]
     def getCurrentState(self):
 
         return self.myCurrentStateW
@@ -108,6 +109,7 @@ class Aichess():
     def DepthFirstSearch(self, currentState, depth):
     
         # Your Code here
+        
         pass
 
  
