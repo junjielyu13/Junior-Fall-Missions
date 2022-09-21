@@ -2,8 +2,11 @@
 **/Problem
 **/*.pdf
 
-# AI
+# python
+.ipynb_checkpoints
 
+# AI
+AI/Teoria
 
 # SO2
 
