@@ -1,12 +1,18 @@
-**/Teoria
+**/Teoria/
+
 **/Problem
-**/*.pdf
+
 *.lof
 
 # python
+/.idea/
+
 .ipynb_checkpoints
+
 __pycache__
+
 __MACOSX
+
 
 # AI
 
