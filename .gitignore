@@ -1,13 +1,15 @@
 **/Teoria
 **/Problem
 **/*.pdf
+*.lof
 
 # python
 .ipynb_checkpoints
 __pycache__
+__MACOSX
 
 # AI
-AI/Teoria
+
 
 # SO2
 
