@@ -54,12 +54,16 @@ class Aichess():
 
         return self.myCurrentStateW
 
+
+
     def getListNextStatesW(self, myState):
 
         self.chess.boardSim.getListNextStatesW(myState)
         self.listNextStates = self.chess.boardSim.listNextStates.copy()
 
         return self.listNextStates
+
+
 
     def isSameState(self, a, b):
 
@@ -79,6 +83,8 @@ class Aichess():
 
         isSameState = isSameState1 and isSameState2
         return isSameState
+
+
 
     def isVisited(self, mystate):
 
@@ -100,7 +106,8 @@ class Aichess():
 
 
     def isCheckMate(self, mystate):
-    
+
+        
         # Your Code
         pass
         
@@ -174,6 +181,9 @@ if __name__ == "__main__":
     currentState = aichess.chess.board.currentStateW.copy()
 
     print("printing board")
+    
+    print("piece: \nR --> 2 \nK --> 6")
+
     aichess.chess.boardSim.print_board()
 
     # get list of next states for current state
@@ -188,8 +198,11 @@ if __name__ == "__main__":
     # aichess.chess.boardSim.listVisitedStates = []
     # find the shortest path, initial depth 0
     depth = 0
-    aichess.BreadthFirstSearch(currentState)
-    #aichess.DepthFirstSearch(currentState, depth)
+
+    aichess.DepthFirstSearch(currentState, depth)
+    # aichess.BreadthFirstSearch(currentState)
+    # aichess.BestFirstSearch(currentState)
+    # aichess.AStarSearch(currentState)
 
     # MovesToMake = ['1e','2e','2e','3e','3e','4d','4d','3c']
 
@@ -212,3 +225,4 @@ if __name__ == "__main__":
     print("#Move sequence...  ", aichess.pathToTarget)
     print("#Visited sequence...  ", aichess.listVisitedStates)
     print("#Current State...  ", aichess.chess.board.currentStateW)
+
