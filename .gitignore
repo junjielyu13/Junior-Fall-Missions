@@ -1,3 +1,6 @@
+# if gitignore does not work:
+# git rm -r --cached .
+
 **/Teoria/
 
 **/Problem
@@ -6,18 +9,16 @@
 
 # python
 /.idea/
-
 .ipynb_checkpoints
-
 __pycache__
-
 __MACOSX
 
 
 # AI
-
+AI/Teoria
 
 # SO2
+SO2/**/data
 
 
 # TallerNousUsos
