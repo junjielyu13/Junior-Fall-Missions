@@ -117,9 +117,22 @@ class Aichess():
     def DepthFirstSearch(self, currentState, depth):
       
         # Your Code here
+        print("current: ")
+        print(currentState)
+        print("depth: ")
+        print(depth)
+        
+ 
         pass
 
  
+
+
+
+
+
+
+
     def BreadthFirstSearch(self, currentState):
        
         # Your Code here
