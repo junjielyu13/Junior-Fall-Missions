@@ -46,13 +46,20 @@ class Aichess():
         self.listNextStates = []
         self.listVisitedStates = []
         self.pathToTarget = []
-        self.currentStateW = self.chess.boardSim.currentStateW;
-        self.depthMax = 8;
+        self.currentStateW = self.chess.boardSim.currentStateW
+        self.innitialState = tuple(tuple(i) for i in sorted(self.currentStateW))
+        self.depthMax = 8
         self.checkMate = False
+        self.pathDone = False
+        self.paths = {}
+        self.paths['path'] = []
+        self.paths['visited'] = []
+        self.checkMateList = [{(0,0,2),(2,4,6)},{(0,1,2),(2,4,6)},{(0,2,2),(2,4,6)},{(0,3,2),(2,4,6)},{(0,5,2),(2,4,6)},{(0,6,2),(2,4,6)},{(0,7,2),(2,4,6)}]
 
+                               
     def getCurrentState(self):
 
-        return self.myCurrentStateW
+        return self.currentStateW
 
 
 
@@ -106,23 +113,110 @@ class Aichess():
 
 
     def isCheckMate(self, mystate):
+        """
+        returns True if the current state matches any checkmate state in the checkmate list
+
+        Args:
+            mystate: current state of board (list[list])
+
+        Returns:
+            True: we are in check mate state
+            False: we are not in checkmate state
+
+        """
+        if mystate in self.checkMateList:
+            return True
+        return False
 
         
-        # Your Code
-        pass
-        
-        
-        
+    def recorregut(self,veinsVisitats, origin, destination):
+        node = destination
+        path = []
+        while node != origin:
+            path.append(node)
+            node = veinsVisitats[node]
+        path.append(node)
+        path.reverse()
+        return path
+
+    def makeMove(self,current_state, next_state):
+        start = [e for e in current_state if e not in next_state]
+        to = [e for e in next_state if e not in current_state]
+        start, to = start[0][0:2], to[0][0:2]   
+        self.chess.moveSim(start, to) 
+
+    def setify(self, states):
+        setStates = set()
+        for state in states:
+            tup = tuple(state)
+            setStates.add(tup)
+        return setStates
+
+    def recorregut(self, veinsVisitats, origin, destination): 
+        node = destination
+        path = []
+        while node != origin:
+            path.append(node)
+            node = veinsVisitats[node]
+        path.append(node)
+        path.reverse()
+        return path
 
     def DepthFirstSearch(self, currentState, depth):
       
         # Your Code here
-        pass
+        
+        self.listVisitedStates.append(currentState)
+        self.pathToTarget.append(currentState)
+        if not self.checkMate:
+            for state in self.getListNextStatesW(currentState):
+                set_state = self.setify(state)
+                if self.isCheckMate(set_state):
+                    self.depthMax = depth
+                    self.checkMate = True
+                    self.pathDone = True
+                    self.pathToTarget.append(state)
+                    self.listVisitedStates.append(state)
+                    self.paths['path'] = self.pathToTarget.copy()
+                    self.paths['visited'] = self.listVisitedStates.copy()
+                    return True
+                
+                elif state in self.listVisitedStates:
+                    continue
+                elif depth >= self.depthMax:
+                    continue
+                else:
+                    self.makeMove(currentState, state)
+                    self.DepthFirstSearch(state, depth+1)
+                    self.makeMove(state, currentState)
+                    if len(self.pathToTarget) != 0:
+                        self.pathToTarget.pop()
+                    if len(self.listVisitedStates) != 0:
+                        self.listVisitedStates.pop()    
+        if self.pathDone:
+            self.pathToTarget = copy.copy(self.paths['path'])
+            self.listVisitedStates = copy.copy(self.paths['visited'])
+            self.currentStateW = self.pathToTarget[-1]
+            for i in range(len(self.pathToTarget)):
+                j = i+1
+                if j < len(self.pathToTarget):
+                    self.makeMove(self.pathToTarget[i], self.pathToTarget[j])
+            
+        return 
+
 
  
+
+
+
+
+
+
+
     def BreadthFirstSearch(self, currentState):
        
         # Your Code here
+        
         pass
 
 
@@ -179,7 +273,6 @@ if __name__ == "__main__":
     print("stating AI chess... ")
     aichess = Aichess(TA, True)
     currentState = aichess.chess.board.currentStateW.copy()
-
     print("printing board")
     
     print("piece: \nR --> 2 \nK --> 6")
@@ -197,12 +290,17 @@ if __name__ == "__main__":
     # starting from current state find the end state (check mate) - recursive function
     # aichess.chess.boardSim.listVisitedStates = []
     # find the shortest path, initial depth 0
+
+    print("\n\n\nStart game.................\n\n\n")
+
     depth = 0
+
 
     aichess.DepthFirstSearch(currentState, depth)
     # aichess.BreadthFirstSearch(currentState)
     # aichess.BestFirstSearch(currentState)
     # aichess.AStarSearch(currentState)
+
 
     # MovesToMake = ['1e','2e','2e','3e','3e','4d','4d','3c']
 
@@ -221,8 +319,9 @@ if __name__ == "__main__":
 
     #     aichess.chess.moveSim(start, to)
 
-    # aichess.chess.boardSim.print_board()
+    aichess.chess.boardSim.print_board()
     print("#Move sequence...  ", aichess.pathToTarget)
     print("#Visited sequence...  ", aichess.listVisitedStates)
-    print("#Current State...  ", aichess.chess.board.currentStateW)
+
+    print("#Current State...  ", aichess.currentStateW)
 
