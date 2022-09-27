@@ -203,6 +203,16 @@ class Aichess():
                     self.makeMove(self.pathToTarget[i], self.pathToTarget[j])
             
         return 
+
+
+ 
+
+
+
+
+
+
+
     def BreadthFirstSearch(self, currentState):
        
         # Your Code here
