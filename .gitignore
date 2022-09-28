@@ -2,9 +2,8 @@
 # git rm -r --cached .
 
 **/Teoria/
-
+.vscode
 **/Problem
-
 *.lof
 
 # python
