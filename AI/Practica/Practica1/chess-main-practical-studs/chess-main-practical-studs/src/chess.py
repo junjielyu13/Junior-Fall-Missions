@@ -91,14 +91,14 @@ class Chess():
         """
 
         if self.boardSim.board[start[0]][start[1]] == None:
-            if verbose:
-                print("There is no piece to move at the start place")
+            #if verbose:
+                #print("There is no piece to move at the start place")
             return
 
 
-        if self.boardSim.board[to[0]][to[1]] != None:
-            if verbose:
-                print("other piece there")
+        #if self.boardSim.board[to[0]][to[1]] != None:
+            #if verbose:
+                #print("other piece there")
 
         target_piece = self.boardSim.board[start[0]][start[1]]
         
@@ -112,8 +112,8 @@ class Chess():
 
         # Checks if a player's own piece is at the `to` coordinate
         if is_end_piece and self.boardSim.board[start[0]][start[1]].color == end_piece.color:
-            if verbose:
-                print("There's a piece in the path.")
+            #if verbose:
+                #print("There's a piece in the path.")
             return
 
         if target_piece.is_valid_move(self.boardSim, start, to):
@@ -150,8 +150,8 @@ class Chess():
 
             self.boardSim.board[to[0]][to[1]] = target_piece
             self.boardSim.board[start[0]][start[1]] = None
-            if verbose:
-                print(str(target_piece) + " moved.")
+            #if verbose:
+                #print(str(target_piece) + " moved.")
             if self.turn and self.black_ghost_piece:
                 self.boardSim.board[self.black_ghost_piece[0]][self.black_ghost_piece[1]] = None
             elif not self.turn and self.white_ghost_piece:
@@ -168,12 +168,12 @@ class Chess():
                 aa = self.boardSim.currentStateW[m]               
                 # only the one to move and only for whites so far
                 if self.boardSim.listNames[int(aa[2]-1)] == str(target_piece) and target_piece.color:
-                    if verbose:
-                        print("->piece initial state ",self.boardSim.currentStateW[m])
+                    #if verbose:
+                        #print("->piece initial state ",self.boardSim.currentStateW[m])
                     self.boardSim.currentStateW[m][0] = to[0]
                     self.boardSim.currentStateW[m][1] = to[1]
-                    if verbose:
-                        print("->piece to state ",self.boardSim.currentStateW[m])
+                    #if verbose:
+                        #print("->piece to state ",self.boardSim.currentStateW[m])
                                                        
                    
                #   print("Next States: ",self.board.getListNextStatesW(self.board.currentStateW[m]))
