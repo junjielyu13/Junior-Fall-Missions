@@ -48,7 +48,7 @@ class Aichess():
         self.pathToTarget = []
         self.currentStateW = self.chess.boardSim.currentStateW
         self.innitialState = tuple(tuple(i) for i in sorted(self.currentStateW))
-        self.depthMax = 8
+        self.depthMax = 6
         self.checkMate = False
         self.pathDone = False
         self.paths = {}
@@ -202,22 +202,38 @@ class Aichess():
                 if j < len(self.pathToTarget):
                     self.makeMove(self.pathToTarget[i], self.pathToTarget[j])
             
-        return 
-
-
- 
-
-
-
-
-
-
+        return "No hi ha checkmate"
 
     def BreadthFirstSearch(self, currentState):
        
         # Your Code here
-        
-        pass
+        queueBfs = queue.Queue()
+        self.listVisitedStates.append(currentState)
+        queueBfs.put((currentState, copy.deepcopy(self), 0))
+        while queueBfs:
+            actual, actual_chess, depth = queueBfs.get()
+            if depth <= self.depthMax:
+                for state in actual_chess.getListNextStatesW(actual):
+                    set_state = self.setify(state)
+                    if state not in self.listVisitedStates:
+                        self.listVisitedStates.append(state)
+                        actual_chess.pathToTarget.append(state)
+                        print(depth)
+                        if self.isCheckMate(set_state):
+                            print('entra')
+                            self.checkMate = True
+                            self.pathDone = True
+                            actual_chess.pathToTarget.append(state)
+                            self.paths['path'] = actual_chess.pathToTarget.copy()
+                            self.paths['visited'] = actual_chess.listVisitedStates.copy()
+                            return True
+                        
+                        chessCopy = copy.deepcopy(actual_chess)
+                        chessCopy.makeMove(actual, state)
+                        queueBfs.put((state, chessCopy, depth+1))
+                      
+            
+        return "No hi ha checkmate"
 
 
     def BestFirstSearch(self, currentState):
@@ -230,7 +246,6 @@ class Aichess():
         
         # Your Code here
         pass
-        
 
 def translate(s):
     """
@@ -266,7 +281,7 @@ if __name__ == "__main__":
     # TA[0][4] = 12
 
     TA[7][0] = 2
-    TA[7][4] = 6
+    TA[7][7] = 6
     TA[0][4] = 12
 
     # initialise board
@@ -297,7 +312,7 @@ if __name__ == "__main__":
 
 
     aichess.DepthFirstSearch(currentState, depth)
-    # aichess.BreadthFirstSearch(currentState)
+    #aichess.BreadthFirstSearch(currentState)
     # aichess.BestFirstSearch(currentState)
     # aichess.AStarSearch(currentState)
 
