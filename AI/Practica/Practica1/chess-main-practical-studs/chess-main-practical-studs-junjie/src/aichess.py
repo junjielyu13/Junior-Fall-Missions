@@ -49,8 +49,13 @@ class Aichess():
         self.currentStateW = self.chess.boardSim.currentStateW
         self.currentStateB = self.chess.boardSim.currentStateB
         self.checkMate = False
-        self.depthMax = float('inf')
+
+        self.depthMax = 8
         self.path = defaultdict()
+
+        self.paths = {}
+        self.paths['path'] = []
+        self.paths['visited'] = []
 
 
     def getCurrentState(self):
@@ -177,38 +182,40 @@ class Aichess():
         
         @param currentState --> list()
             Position of a piece to be moved
-
-        @param depth --> int
         
         @return --> none:
             Generate paths on the way with DFS
         '''
 
-        if currentState[0][0:2] == currentState[1][0:2]: # Check if two piece are in the same position
-            return
+        self.listVisitedStates.append(currentState)     # Add the visited pieces to listVisitedStates
+        self.pathToTarget.append(currentState)          # Add the current state to pahtTotaget
 
-        if not self.checkMate or depth > self.depthMax:  # Check if there is no checkmate or depth out of range
-
-            self.listVisitedStates.append(currentState)  # Add the visited pieces to listVisitedStates
-
+        if not self.checkMate:                          # Check if there is no checkmate
             for nextState in self.getListNextStatesW(currentState):
 
-                if not self.isVisited(nextState): 
+                if self.isCheckMate(nextState):            
+                    self.checkMate = True
+                    self.pathToTarget.append(nextState)
+                    self.listVisitedStates.append(nextState)
+                    self.paths['path'] = self.pathToTarget.copy()           # Avoid recall pathToTarget 
+                    self.paths['visited'] = self.listVisitedStates.copy()   # Avoid recall listVisitedStates
+                    return
+                
+                elif nextState not in self.listVisitedStates and depth < self.depthMax:
+                    self.moveOn(currentState, nextState)        # Move the pawn
+                    self.DepthFirstSearch(nextState, depth+1)   # DFS recursion, go to the next depth
+                    self.moveOn(nextState, currentState)        # Recall the pawn
 
-                    next_key = tuple(tuple(state) for state in sorted(nextState)) # Generate dict key
-                    self.path[next_key] = sorted(currentState)                    # Defines the parent state of the current state
+                    if len(self.pathToTarget) != 0:
+                        self.pathToTarget.pop()             # Recall pathToTarget
+                    # if len(self.listVisitedStates) != 0:    # for case of depth 6
+                    #     self.listVisitedStates.pop()        # Recall listVisitedStates
 
-                    if self.isCheckMate(nextState):
-                        self.pathToTarget = self.getPath(self.innitialStateW, sorted(nextState)) # Generate final answer path
-                        self.depthMax = depth
-                        self.checkMate = True
-                        return
-                    else:
-                        self.moveOn(currentState, nextState)        # Move the pawn
-                        self.DepthFirstSearch(nextState, depth + 1) # DFS recursion, go to the next depth
-                        self.moveOn(nextState, currentState)        # Recall the pawn
-
-        return
+        if self.checkMate:                              # Generate final answer path
+            self.pathToTarget = copy.copy(self.paths['path'])
+            self.listVisitedStates = copy.copy(self.paths['visited'])
+            
+        return 
 
 
 

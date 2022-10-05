@@ -45,7 +45,7 @@ def check_diag_castle(color, board, start, to):
     """
 
     if abs(start[0] - to[0]) != abs(start[1] - to[1]):
-        print(incorrect_path)
+        #print(incorrect_path)
         return False
 
     x_pos = 1 if to[0] - start[0] > 0 else -1
@@ -90,7 +90,7 @@ def check_diag(board, start, to):
     """
 
     if abs(start[0] - to[0]) != abs(start[1] - to[1]):
-        print(incorrect_path)
+        #print(incorrect_path)
         return False
 
     x_pos = 1 if to[0] - start[0] > 0 else -1
@@ -242,7 +242,7 @@ class Rook(Piece):
     def is_valid_move(self, board, start, to):
         if start[0] == to[0] or start[1] == to[1]:
             return check_updown(board, start, to)
-        print(incorrect_path)
+        #print(incorrect_path)
         return False
 
 
@@ -257,7 +257,7 @@ class Knight(Piece):
             return True
         if abs(start[0] - to[0]) == 1 and abs(start[1] - to[1]) == 2:
             return True
-        print(incorrect_path)
+        #print(incorrect_path)
         return False
 
 
@@ -285,7 +285,7 @@ class Queen(Piece):
         # up/down
         elif start[0] == to[0] or start[1] == to[1]:
             return check_updown(board, start, to)
-        print(incorrect_path)
+        #print(incorrect_path)
         return False
 
 
@@ -449,7 +449,7 @@ class King(Piece):
                 self.first_move = False
                 return True
 
-        print(incorrect_path)
+        #print(incorrect_path)
         return False
 
 
@@ -497,7 +497,7 @@ class Pawn(Piece):
                 print("Invalid move" + " or " +
                       "Cannot move forward twice if not first move.")
                 return False
-            print(incorrect_path)
+            #print(incorrect_path)
             return False
 
         else:
@@ -523,5 +523,5 @@ class Pawn(Piece):
                 print("Invalid move" + " or " +
                       "Cannot move forward twice if not first move.")
                 return False
-            print(incorrect_path)
+            #print(incorrect_path)
             return False

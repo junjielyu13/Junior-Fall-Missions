@@ -88,7 +88,7 @@ class Chess():
         """
 
         if self.boardSim.board[start[0]][start[1]] == None:
-            print("There is no piece to move at the start place")
+            #print("There is no piece to move at the start place")
             return
 
         if self.boardSim.board[to[0]][to[1]] != None:
@@ -191,7 +191,7 @@ class Chess():
         """
 
         if self.board.board[start[0]][start[1]] == None:
-            print("There is no piece to move at the start place")
+            #print("There is no piece to move at the start place")
             return
 
         target_piece = self.board.board[start[0]][start[1]]
