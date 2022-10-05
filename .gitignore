@@ -1,10 +1,49 @@
+<<<<<<< HEAD
 # if gitignore does not work:
 # git rm -r --cached .
 
 **/Teoria/
-
+.vscode
 **/Problem
+*.lof
+*.zip
 
+
+# python
+.idea
+.ipynb_checkpoints
+__pycache__
+__MACOSX
+
+
+# AI
+AI/Teoria
+
+
+# SO2
+SO2/**/data
+SO2/**/Psoure
+
+SO2/Practica/Practica_1/practica4/matrix.bin
+
+
+# TallerNousUsos
+TallerNousUsos/Practica/TNUI_P1/data
+TallerNousUsos/Practica/**/Psoure
+
+
+# VisioAI
+VisioAI/**/Psource
+
+
+
+=======
+# if gitignore does not work:
+# git rm -r --cached .
+
+**/Teoria/
+.vscode
+**/Problem
 *.lof
 
 # python
@@ -28,4 +67,5 @@ TallerNousUsos/Practica/TNUI_P1/data
 # VisioAi
 
 
+>>>>>>> a21aeee9c027a9b5f159961d1a1ce9fe12aca9ee
 # Xarxa
