@@ -49,8 +49,12 @@ class Aichess():
         self.currentStateW = self.chess.boardSim.currentStateW
         self.currentStateB = self.chess.boardSim.currentStateB
         self.checkMate = False
+        self.pathDone = False
         self.depthMax = float('inf')
         self.path = defaultdict()
+        self.paths = {}
+        self.paths['path'] = []
+        self.paths['visited'] = []
 
 
     def getCurrentState(self):
@@ -170,45 +174,53 @@ class Aichess():
 
 
 
-
+    def setify(self, states):
+        setStates = set()
+        for state in states:
+            tup = tuple(state)
+            setStates.add(tup)
+        return setStates
     def DepthFirstSearch(self, currentState, depth):
-        '''
-        Depth First Search
+      
+        # Your Code here
         
-        @param currentState --> list()
-            Position of a piece to be moved
-
-        @param depth --> int
-        
-        @return --> none:
-            Generate paths on the way with DFS
-        '''
-
-        if currentState[0][0:2] == currentState[1][0:2]: # Check if two piece are in the same position
-            return
-
-        if not self.checkMate or depth > self.depthMax:  # Check if there is no checkmate or depth out of range
-
-            self.listVisitedStates.append(currentState)  # Add the visited pieces to listVisitedStates
-
-            for nextState in self.getListNextStatesW(currentState):
-
-                if not self.isVisited(nextState): 
-
-                    next_key = tuple(tuple(state) for state in sorted(nextState)) # Generate dict key
-                    self.path[next_key] = sorted(currentState)                    # Defines the parent state of the current state
-
-                    if self.isCheckMate(nextState):
-                        self.pathToTarget = self.getPath(self.innitialStateW, sorted(nextState)) # Generate final answer path
-                        self.depthMax = depth
-                        self.checkMate = True
-                        return
-                    else:
-                        self.moveOn(currentState, nextState)        # Move the pawn
-                        self.DepthFirstSearch(nextState, depth + 1) # DFS recursion, go to the next depth
-                        self.moveOn(nextState, currentState)        # Recall the pawn
-
-        return
+        self.listVisitedStates.append(currentState)
+        self.pathToTarget.append(currentState)
+        if not self.checkMate:
+            for state in self.getListNextStatesW(currentState):
+                set_state = self.setify(state)
+                if self.isCheckMate(state):
+                    self.depthMax = depth
+                    self.checkMate = True
+                    self.pathDone = True
+                    self.pathToTarget.append(state)
+                    self.listVisitedStates.append(state)
+                    self.paths['path'] = self.pathToTarget.copy()
+                    self.paths['visited'] = self.listVisitedStates.copy()
+                    return True
+                
+                elif state in self.listVisitedStates:
+                    continue
+                elif depth >= self.depthMax:
+                    continue
+                else:
+                    self.moveOn(currentState, state)
+                    self.DepthFirstSearch(state, depth+1)
+                    self.moveOn(state, currentState)
+                    if len(self.pathToTarget) != 0:
+                        self.pathToTarget.pop()
+                    if len(self.listVisitedStates) != 0:
+                        self.listVisitedStates.pop()    
+        if self.pathDone:
+            self.pathToTarget = copy.copy(self.paths['path'])
+            self.listVisitedStates = copy.copy(self.paths['visited'])
+            self.currentStateW = self.pathToTarget[-1]
+            for i in range(len(self.pathToTarget)):
+                j = i+1
+                if j < len(self.pathToTarget):
+                    self.moveOn(self.pathToTarget[i], self.pathToTarget[j])
+            
+        return 
 
 
 
@@ -373,7 +385,8 @@ if __name__ == "__main__":
     # TA[0][4] = 12
 
     TA[7][0] = 2
-    TA[7][4] = 6
+    #TA[7][4] = 6
+    TA[7][7] = 6
     TA[0][4] = 12
     #TA[0][0] = 8
 
@@ -414,50 +427,50 @@ if __name__ == "__main__":
 
 
 
-    '''
-        BFS TEST
-    '''
-    print("\n\nstating BFS ... ")
-    aichess_BFS.chess.boardSim.print_board()
+    # '''
+    #     BFS TEST
+    # '''
+    # print("\n\nstating BFS ... ")
+    # aichess_BFS.chess.boardSim.print_board()
 
-    start = time.time()
-    aichess_BFS.BreadthFirstSearch(currentState)
-    end = time.time()
+    # start = time.time()
+    # aichess_BFS.BreadthFirstSearch(currentState)
+    # end = time.time()
 
-    print("#Move sequence...  ", aichess_BFS.pathToTarget)
-    print("#Visited sequence...  ", aichess_BFS.listVisitedStates)
-    print("#Current State...  ", aichess_BFS.chess.board.currentStateW)
+    # print("#Move sequence...  ", aichess_BFS.pathToTarget)
+    # print("#Visited sequence...  ", aichess_BFS.listVisitedStates)
+    # print("#Current State...  ", aichess_BFS.chess.board.currentStateW)
 
-    startState = aichess_BFS.pathToTarget[0]
-    path = aichess_BFS.pathToTarget[1:]
-    for nextState in path:
-        movePiece(aichess_BFS, startState, nextState)
-        startState = nextState
-        aichess_BFS.chess.board.print_board()
-    print("BFS = ", end - start, "s")
+    # startState = aichess_BFS.pathToTarget[0]
+    # path = aichess_BFS.pathToTarget[1:]
+    # for nextState in path:
+    #     movePiece(aichess_BFS, startState, nextState)
+    #     startState = nextState
+    #     aichess_BFS.chess.board.print_board()
+    # print("BFS = ", end - start, "s")
     
 
 
 
 
-    '''
-        A* SEARCH TEST
-    '''
-    print("\n\nstating A* SEARCH ... ")
-    aichess_ASTAR.chess.board.print_board()
+    # '''
+    #     A* SEARCH TEST
+    # '''
+    # print("\n\nstating A* SEARCH ... ")
+    # aichess_ASTAR.chess.board.print_board()
 
-    start = time.time()
-    aichess_ASTAR.AStarSearch(currentState)
-    end = time.time()
+    # start = time.time()
+    # aichess_ASTAR.AStarSearch(currentState)
+    # end = time.time()
 
-    print("#Move sequence...  ", aichess_ASTAR.pathToTarget)
-    print("#Visited sequence...  ", aichess_ASTAR.listVisitedStates)
-    print("#Current State...  ", aichess_ASTAR.chess.board.currentStateW)
+    # print("#Move sequence...  ", aichess_ASTAR.pathToTarget)
+    # print("#Visited sequence...  ", aichess_ASTAR.listVisitedStates)
+    # print("#Current State...  ", aichess_ASTAR.chess.board.currentStateW)
 
-    startState = aichess_ASTAR.pathToTarget[0]
-    path = aichess_ASTAR.pathToTarget[1:]
-    for nextState in path:
-        movePiece(aichess_ASTAR, startState, nextState)
-        startState = nextState
-        aichess_ASTAR.chess.board.print_board()
-    print("A* star = ", end - start, "s")
+    # startState = aichess_ASTAR.pathToTarget[0]
+    # path = aichess_ASTAR.pathToTarget[1:]
+    # for nextState in path:
+    #     movePiece(aichess_ASTAR, startState, nextState)
+    #     startState = nextState
+    #     aichess_ASTAR.chess.board.print_board()
+    # print("A* star = ", end - start, "s")
