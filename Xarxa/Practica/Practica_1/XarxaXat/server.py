@@ -2,8 +2,34 @@ import socket
 from threading import Thread
 import time
 
+class Administrator:
+    """
+    Class of Adiministrator of server
+    ...
+    Attributes:
+    -----------
+    socket :  socket
+    ip :      ip address
+    port :    port number
+    username: username     
 
-class Manager:
+    Methods:
+    --------
+    - getId() -> str:
+        get id of client
+
+    - getTime() -> str:
+        get current time
+
+    - sendMsg(msg:str, username:str) -> none:
+        server sends message to client
+
+    - recvMsg(bufsize:int) -> none:
+        server receive message from client
+
+    - closeClient() -> none:
+        close client 
+    """
     def __init__(self, socket, addr, username):
         self.ip = addr[0]
         self.port = addr[1]
@@ -30,54 +56,61 @@ class Manager:
         except:
             return False
 
-    def close(self):
+    def closeClient(self):
         try:
             self.socket.close()
         except:
             return False
 
 
-    def new_client(client):
-        try:
-            print(f"({client.ip}, {client.port}) try to connect")
+def new_client(client):
+    '''
+    Serve each client as a server
+    
+    @param client --> Administrator
 
+    @return --> none
+    '''
+
+    try:
+        print(f"({client.ip}, {client.port}) try to connect")
+
+        # Set the username of the client
+        data = client.recvMsg()
+        if not data:
+            return
+        client.username = data
+        print(f"{client.username} ({client.port}) is connected \n")
+
+        for c in clients.values():
+            c.sendMsg(f"{client.username} ({client.port}) is connected\n", client.username)
+
+        while True:
+            # waiting for client activity
             data = client.recvMsg()
-
             if not data:
-                return
+                break
 
-            client.username = data
+            print(f"{client.getTime()} : User {client.username} ({client.port}) send > {data}")
 
-            print(f"{client.username} ({client.port}) is connected \n")
-            iports[client.username] = client.getId()
-
+            # forward to other clients
             for c in clients.values():
-                c.sendMsg(f"{client.username} ({client.port}) is connected\n", client.username)
+                c.sendMsg(data, client.username)
 
-            while True:
-                data = client.recvMsg()
-                if not data:
-                    break
+    except:
+        print("Connection error")
 
-                print(f"{client.getTime()} : User {client.username} ({client.port}) send > {data}")
+    finally:
+        print(f"{client.username}: ({client.ip}, {client.port}) disconnected")
+        client.closeClient()
+        clients.pop(client.getId())
 
-                for c in clients.values():
-                    c.sendMsg(data, client.username)
-
-        except:
-            print("Connection error")
-
-        finally:
-            print(f"{client.username}: ({client.ip}, {client.port}) disconnected")
-            client.close()
-            clients.pop(client.getId())
 
 
 if __name__ == '__main__':
     HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
     PORT = 65432
     clients = {}
-    iports = {}
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -90,14 +123,15 @@ if __name__ == '__main__':
         while True:
             conn, addr = server.accept()
 
-            client = Manager(conn, addr, "")
+            client = Administrator(conn, addr, "")
 
             clients[client.getId()] = client
-            thead = Thread(target=Manager.new_client, args=(client,))
+            thead = Thread(target=new_client, args=(client,))
             thead.start()
 
     except:
-        client.close()
+        print('Server error')
 
     finally:
         print("Server is closing")
+        client.close()
