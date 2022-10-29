@@ -21,13 +21,11 @@ void **malloc_matrix(int nrow, int ncol, size_t size)
 {
   int i;
 
-  void **ptr = NULL;
+  void **ptr;
 
-  ptr = (void **) malloc(sizeof(void *) * nrow);
-  for(i = 0; i < nrow; i++){
-    ptr[i] = NULL;
-    ptr[i] =  (void *) calloc(1, size * ncol);
-  }
+  ptr = malloc(sizeof(void *) * nrow);
+  for(i = 0; i < nrow; i++)
+    ptr[i] = malloc(size * ncol);
 
   return ptr;
 }
@@ -42,11 +40,8 @@ void free_matrix(void **matrix, int nrow)
 {
   int i;
 
-  for(i = 0; i < nrow; i++){
+  for(i = 0; i < nrow; i++)
     free(matrix[i]);
-  }
-
-  free(matrix);
 }
 
 /**
