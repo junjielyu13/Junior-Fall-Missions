@@ -6,7 +6,7 @@
 **/Problem
 *.lof
 *.zip
-
+**/Examen/
 
 # python
 .idea
@@ -26,11 +26,18 @@ SO2/**/Psoure
 
 SO2/Practica/Practica_1/practica4/matrix.bin
 
+SO2/practica/Practica_3/P3-Analisi de codi/codi/*.csv
+
+SO2/practica/Practica_4/codi/codi/*.csv
+
 
 # TallerNousUsos
 TallerNousUsos/Practica/**/Psoure
 TallerNousUsos/Practica/TNUI_P1/data
 
+TallerNousUsos/Practica/TNUI_P2/ml-1m
+
+TallerNousUsos/Practica/TNUI_P3/data
 
 # VisioAI
 VisioAI/**/Psource
