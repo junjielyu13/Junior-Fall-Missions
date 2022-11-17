@@ -1,5 +1,6 @@
 import board
 import piece
+from lib import initLogging, logging
 
 import numpy as np
 
@@ -304,6 +305,8 @@ def translate(s):
 
 if __name__ == "__main__":
 
+    initLogging()
+
     # intiialize board
     # current state initialization
     TA = np.zeros((8, 8))
@@ -330,7 +333,7 @@ if __name__ == "__main__":
 
     # initialize board
     chess = Chess(TA)
-#  chess = Chess([],False)
+    #  chess = Chess([],False)
 
     # print board
     chess.board.print_board()
