@@ -1,8 +1,13 @@
+
 import board
 import piece
+import aichess
+
 from lib import initLogging, logging
 
+
 import numpy as np
+import copy
 
 
 class Chess():
@@ -303,6 +308,9 @@ def translate(s):
         return None
 
 
+
+
+
 if __name__ == "__main__":
 
     initLogging()
@@ -310,30 +318,61 @@ if __name__ == "__main__":
     # intiialize board
     # current state initialization
     TA = np.zeros((8, 8))
+
+
+    # # white pieces
+    # TA[[6, ]] = 1  # white pawn
+    # TA[7][0] = 2   # white rook
+    # TA[7][1] = 3   # white knight
+    # TA[7][2] = 4   # white bishop
+    # TA[7][3] = 6   # white king
+    # TA[7][4] = 5   # white queen
+    # TA[7][5] = 4   # white bishop
+    # TA[7][6] = 3   # white knight
+    # TA[7][7] = 2   # white rook
+    # # black pieces
+    # TA[[1, ]] = 7  # black pawn
+    # TA[0][0] = 8   # black rook
+    # TA[0][1] = 9   # black knight
+    # TA[0][2] = 10  # black bishop
+    # TA[0][3] = 11  # black queen
+    # TA[0][4] = 12  # black king
+    # TA[0][5] = 10  # black bishop
+    # TA[0][6] = 9   # black knight
+    # TA[0][7] = 8   # black rook
+
+
     # white pieces
-    TA[[6, ]] = 1  # white pawn
-    TA[7][0] = 2
-    TA[7][1] = 3
-    TA[7][2] = 4
-    TA[7][3] = 6
-    TA[7][4] = 5
-    TA[7][5] = 4
-    TA[7][6] = 3
-    TA[7][7] = 2
+    TA[7][5] = 6        # white king
+    TA[7][0] = 2        # white rook
+
     # black pieces
-    TA[[1, ]] = 7  # black pawn
-    TA[0][0] = 8
-    TA[0][1] = 9
-    TA[0][2] = 10
-    TA[0][3] = 11
-    TA[0][4] = 12
-    TA[0][5] = 10
-    TA[0][6] = 9
-    TA[0][7] = 8
+    TA[0][5] = 12       # black king
+    TA[0][0] = 8        # black rook
+
 
     # initialize board
     chess = Chess(TA)
     #  chess = Chess([],False)
+
+
+    WhitePlayerAichess = aichess.Aichess(TA, True, True)
+    WhitePlayerCurrentState = WhitePlayerAichess.chess.board.currentStateW.copy()
+    
+    BlackPlayerAichess = aichess.Aichess(TA, False, True)
+    BlackPlayerCurrentState = BlackPlayerAichess.chess.board.currentStateB.copy()
+
+
+
+    WhitePlayerMinimax = copy.deepcopy(WhitePlayerAichess)
+    BlackPlayerMinimax = copy.deepcopy(BlackPlayerAichess)
+
+
+
+    logging.info("minimax: ")
+    #WhitePlayerMinimax.Minimax(WhitePlayerCurrentState, 4)
+    BlackPlayerAichess.Minimax(BlackPlayerCurrentState, 4)
+
 
     # print board
     chess.board.print_board()

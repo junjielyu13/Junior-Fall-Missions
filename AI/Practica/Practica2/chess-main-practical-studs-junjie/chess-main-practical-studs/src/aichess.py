@@ -27,23 +27,36 @@ class Aichess():
     """
     A class to represent the game of chess.
     ...
+
     Attributes:
     -----------
     chess : Chess
         represents the chess game
+
+    whitePlayer : Bool
+        True  --> white player
+        False --> black player
+    
+    myinit : Bool
+        True  --> use my initial state
+        False --> use board initial state
+
+
     Methods:
     --------
     startGame(pos:stup) -> None
         Promotes a pawn that has reached the other side to another, or the same, piece
     """
 
-    def __init__(self, TA, myinit=True):
+    def __init__(self, TA, White, myinit=True):
 
         if myinit:
             self.chess = chess.Chess(TA, True)
         else:
             self.chess = chess.Chess([], False)
 
+        self.whitePlayer = White
+        
         self.listNextStates = []
         self.listVisitedStates = []
         self.pathToTarget = []
@@ -65,10 +78,15 @@ class Aichess():
 
 
 
-    def getListNextStatesW(self, myState):
-        self.chess.boardSim.getListNextStatesW(myState)
-        self.listNextStates = self.chess.boardSim.listNextStates.copy()
-        return self.listNextStates
+    def getListNextStates(self, myState):
+        if self.whitePlayer:
+            self.chess.boardSim.getListNextStatesW(myState)
+            self.listNextStates = self.chess.boardSim.listNextStates.copy()
+            return self.listNextStates
+        else:
+            self.chess.boardSim.getListNextStatesB(myState)
+            self.listNextStates = self.chess.boardSim.listNextStates.copy()
+            return self.listNextStates
 
 
 
@@ -190,7 +208,7 @@ class Aichess():
         self.pathToTarget.append(currentState)          # Add the current state to pahtTotaget
 
         if not self.checkMate:                          # Check if there is no checkmate
-            for nextState in self.getListNextStatesW(currentState):
+            for nextState in self.getListNextStates(currentState):
 
                 if self.isCheckMate(nextState):            
                     self.checkMate = True
@@ -246,7 +264,7 @@ class Aichess():
                     self.pathToTarget = self.getPath(self.innitialStateW, nextState) 
                     return
 
-                for nextState in self.getListNextStatesW(state):
+                for nextState in self.getListNextStates(state):
                     next_key = tuple(tuple(state) for state in sorted(nextState))   # Generate dict key
                     if next_key not in list(self.path.keys()):                      # same as <if not self.isVisited(nextState):> 
                         self.path[next_key] = state                                 # Defines the parent state of the current state
@@ -310,7 +328,7 @@ class Aichess():
 
             if state[0][0:2] != state[1][0:2]:              
                 self.listVisitedStates.append(state)
-                for nextState in self.getListNextStatesW(state):
+                for nextState in self.getListNextStates(state):
                     
                     if not self.isVisited(nextState):
                         
@@ -333,13 +351,20 @@ class Aichess():
 
 
 
-    def Minimax(self, currentState):
-        pass
+    def Minimax(self, currentState, depth = 4):
 
+        logging.info("current:")
+        logging.info(currentState)
+
+        logging.info("nextState:")
+        logging.info(self.getListNextStates(currentState))
     
+
 
     def AlfaBeta(self, currentState):
         pass
+
+
 
 
     def Expectimax(self, currentState):
@@ -374,6 +399,9 @@ def movePiece(aichess, currentState, nextState):
     aichess.chess.move(start, to)
     return
 
+
+
+
 def practica_1():
 
     TA = np.zeros((8, 8))
@@ -390,17 +418,14 @@ def practica_1():
 
     # initialise board
     print("stating AI chess... ")
-    aichess = Aichess(TA, True)
+    aichess = Aichess(TA, True, True)
     currentState = aichess.chess.board.currentStateW.copy()
 
-
-    aichess_DFS = copy.deepcopy(aichess)
-    aichess_BFS = copy.deepcopy(aichess)
-    aichess_ASTAR = copy.deepcopy(aichess)
 
     '''
         DFS TEST
     '''
+    aichess_DFS = copy.deepcopy(aichess)
     print("\n\nstating DFS ... ")
     depth = 0
     aichess_DFS.chess.board.print_board()
@@ -427,6 +452,7 @@ def practica_1():
     '''
         BFS TEST
     '''
+    aichess_BFS = copy.deepcopy(aichess)
     print("\n\nstating BFS ... ")
     aichess_BFS.chess.boardSim.print_board()
 
@@ -452,6 +478,7 @@ def practica_1():
     '''
         A* SEARCH TEST
     '''
+    aichess_ASTAR = copy.deepcopy(aichess)
     print("\n\nstating A* SEARCH ... ")
     aichess_ASTAR.chess.board.print_board()
 
@@ -478,8 +505,6 @@ if __name__ == "__main__":
 
     initLogging()
 
-    logging.info("dasdasdasdasdasdasdasdasdasd")
-
     #   if len(sys.argv) < 2:
     #       sys.exit(usage())
 
@@ -501,7 +526,8 @@ if __name__ == "__main__":
 
     # initialise board
     print("stating AI chess... ")
-    aichess = Aichess(TA, True)
+    aichess = Aichess(TA, True, True)
     currentState = aichess.chess.board.currentStateW.copy()
+
 
     aichess.chess.board.print_board()
