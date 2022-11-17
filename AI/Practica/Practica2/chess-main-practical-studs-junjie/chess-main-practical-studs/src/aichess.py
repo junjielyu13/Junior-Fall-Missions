@@ -8,6 +8,8 @@ Created on Thu Sep  8 11:22:03 2022
 
 import copy
 import time
+from lib import initLogging, logging
+
 
 import chess
 import numpy as np
@@ -173,9 +175,6 @@ class Aichess():
         return
 
 
-
-
-
     def DepthFirstSearch(self, currentState, depth):
         '''
         Depth First Search
@@ -218,9 +217,6 @@ class Aichess():
         return 
 
 
-
-
-
     def BreadthFirstSearch(self, currentState):
         '''
         Breadth First Search
@@ -257,11 +253,6 @@ class Aichess():
                         queue.put(nextState)                                        # Add the latest found to the queue
 
         return
-
-
-
-
-
 
 
     def AStarSearch(self, currentState):
@@ -341,6 +332,22 @@ class Aichess():
 
 
 
+
+    def Minimax(self, currentState):
+        pass
+
+    
+
+    def AlfaBeta(self, currentState):
+        pass
+
+
+    def Expectimax(self, currentState):
+        pass
+
+
+
+
 def translate(s):
     """
     Translates traditional board coordinates of chess into list indices
@@ -367,11 +374,8 @@ def movePiece(aichess, currentState, nextState):
     aichess.chess.move(start, to)
     return
 
-if __name__ == "__main__":
-    #   if len(sys.argv) < 2:
-    #       sys.exit(usage())
+def practica_1():
 
-    # intiialize board
     TA = np.zeros((8, 8))
     # white pieces
     # TA[0][0] = 2
@@ -393,7 +397,6 @@ if __name__ == "__main__":
     aichess_DFS = copy.deepcopy(aichess)
     aichess_BFS = copy.deepcopy(aichess)
     aichess_ASTAR = copy.deepcopy(aichess)
-
 
     '''
         DFS TEST
@@ -446,7 +449,6 @@ if __name__ == "__main__":
 
 
 
-
     '''
         A* SEARCH TEST
     '''
@@ -468,3 +470,38 @@ if __name__ == "__main__":
         startState = nextState
         aichess_ASTAR.chess.board.print_board()
     print("A* star = ", end - start, "s")
+
+
+
+
+if __name__ == "__main__":
+
+    initLogging()
+
+    logging.info("dasdasdasdasdasdasdasdasdasd")
+
+    #   if len(sys.argv) < 2:
+    #       sys.exit(usage())
+
+    # intiialize board
+    TA = np.zeros((8, 8))
+    # white pieces
+    # TA[0][0] = 2
+    # TA[2][4] = 6
+    # # black pieces
+    # TA[0][4] = 12
+
+    # white pieces
+    TA[7][5] = 6        # white king
+    TA[7][0] = 2        # white rook
+
+    # black pieces
+    TA[0][5] = 12       # black king
+    TA[0][0] = 8        # black rook
+
+    # initialise board
+    print("stating AI chess... ")
+    aichess = Aichess(TA, True)
+    currentState = aichess.chess.board.currentStateW.copy()
+
+    aichess.chess.board.print_board()
