@@ -78,6 +78,9 @@ class Chess():
                     pawn = piece.Pawn(True)
         self.board.board[pos[0]][pos[1]] = pawn
 
+
+
+
     def moveSim(self, start, to):
         """
         Moves a piece at `start` to `to`. Does nothing if there is no piece at the starting point.
@@ -95,6 +98,7 @@ class Chess():
 
         if self.boardSim.board[start[0]][start[1]] == None:
             #print("There is no piece to move at the start place")
+            logging.critical("There is no piece to move at the start place")
             return
 
         if self.boardSim.board[to[0]][to[1]] != None:
@@ -125,11 +129,9 @@ class Chess():
                 print("castled")
 
                 if self.turn and self.black_ghost_piece:
-                    self.boardSim.board[self.black_ghost_piece[0]
-                                        ][self.black_ghost_piece[1]] = None
+                    self.boardSim.board[self.black_ghost_piece[0]][self.black_ghost_piece[1]] = None
                 elif not self.turn and self.white_ghost_piece:
-                    self.boardSim.board[self.white_ghost_piece[0]
-                                        ][self.white_ghost_piece[1]] = None
+                    self.boardSim.board[self.white_ghost_piece[0]][self.white_ghost_piece[1]] = None
                 self.turn = not self.turn
                 return
 
@@ -141,15 +143,10 @@ class Chess():
                 if self.boardSim.board[to[0]][to[1]].name == "GP":
 
                     if self.turn:
-                        self.boardSim.board[
-                            self.black_ghost_piece[0] + 1
-                        ][
-                            self.black_ghost_piece[1]
-                        ] = None
+                        self.boardSim.board[self.black_ghost_piece[0] + 1][self.black_ghost_piece[1]] = None
                         self.black_ghost_piece = None
                     else:
-                        self.boardSim.board[self.white_ghost_piece[0] -
-                                            1][self.black_ghost_piece[1]] = None
+                        self.boardSim.board[self.white_ghost_piece[0] - 1][self.black_ghost_piece[1]] = None
                         self.white_ghost_piece = None
 
             self.boardSim.board[to[0]][to[1]] = target_piece
@@ -157,11 +154,9 @@ class Chess():
             #print(str(target_piece) + " moved.")
 
             if self.turn and self.black_ghost_piece:
-                self.boardSim.board[self.black_ghost_piece[0]
-                                    ][self.black_ghost_piece[1]] = None
+                self.boardSim.board[self.black_ghost_piece[0]][self.black_ghost_piece[1]] = None
             elif not self.turn and self.white_ghost_piece:
-                self.boardSim.board[self.white_ghost_piece[0]
-                                    ][self.white_ghost_piece[1]] = None
+                self.boardSim.board[self.white_ghost_piece[0]][self.white_ghost_piece[1]] = None
 
             # alternate player
             self.turn = not self.turn
@@ -173,13 +168,15 @@ class Chess():
                 aa = self.boardSim.currentStateW[m]
                 # only the one to move and only for whites so far
                 if self.boardSim.listNames[int(aa[2]-1)] == str(target_piece) and target_piece.color:
-
                     #print("->piece initial state ",self.boardSim.currentStateW[m])
                     self.boardSim.currentStateW[m][0] = to[0]
                     self.boardSim.currentStateW[m][1] = to[1]
                     #print("->piece to state ",self.boardSim.currentStateW[m])
 
                #   print("Next States: ",self.board.getListNextStatesW(self.board.currentStateW[m]))
+
+
+
 
     def move(self, start, to):
         """
@@ -224,11 +221,9 @@ class Chess():
                 print("castled")
 
                 if self.turn and self.black_ghost_piece:
-                    self.board.board[self.black_ghost_piece[0]
-                                     ][self.black_ghost_piece[1]] = None
+                    self.board.board[self.black_ghost_piece[0]][self.black_ghost_piece[1]] = None
                 elif not self.turn and self.white_ghost_piece:
-                    self.board.board[self.white_ghost_piece[0]
-                                     ][self.white_ghost_piece[1]] = None
+                    self.board.board[self.white_ghost_piece[0]][self.white_ghost_piece[1]] = None
                 self.turn = not self.turn
                 return
 
@@ -239,15 +234,10 @@ class Chess():
                 # coordinate from en passant
                 if self.board.board[to[0]][to[1]].name == "GP":
                     if self.turn:
-                        self.board.board[
-                            self.black_ghost_piece[0] + 1
-                        ][
-                            self.black_ghost_piece[1]
-                        ] = None
+                        self.board.board[self.black_ghost_piece[0] + 1][self.black_ghost_piece[1]] = None
                         self.black_ghost_piece = None
                     else:
-                        self.board.board[self.white_ghost_piece[0] -
-                                         1][self.black_ghost_piece[1]] = None
+                        self.board.board[self.white_ghost_piece[0] - 1][self.black_ghost_piece[1]] = None
                         self.white_ghost_piece = None
 
             self.board.board[to[0]][to[1]] = target_piece
@@ -255,11 +245,9 @@ class Chess():
             print(str(target_piece) + " moved.")
 
             if self.turn and self.black_ghost_piece:
-                self.board.board[self.black_ghost_piece[0]
-                                 ][self.black_ghost_piece[1]] = None
+                self.board.board[self.black_ghost_piece[0]][self.black_ghost_piece[1]] = None
             elif not self.turn and self.white_ghost_piece:
-                self.board.board[self.white_ghost_piece[0]
-                                 ][self.white_ghost_piece[1]] = None
+                self.board.board[self.white_ghost_piece[0]][self.white_ghost_piece[1]] = None
 
             # alternate player
             self.turn = not self.turn
@@ -271,9 +259,7 @@ class Chess():
                 aa = self.board.currentStateW[m]
                 # only the one to move and only for whites so far
                 if self.board.listNames[int(aa[2]-1)] == str(target_piece) and target_piece.color:
-
-                    print("->piece initial state ",
-                          self.board.currentStateW[m])
+                    print("->piece initial state ", self.board.currentStateW[m])
                     self.board.currentStateW[m][0] = to[0]
                     self.board.currentStateW[m][1] = to[1]
                     print("->piece to state ", self.board.currentStateW[m])
@@ -370,7 +356,7 @@ if __name__ == "__main__":
 
 
     logging.info("minimax: ")
-    #WhitePlayerMinimax.Minimax(WhitePlayerCurrentState, 4)
+    WhitePlayerMinimax.Minimax(WhitePlayerCurrentState, 4)
     BlackPlayerAichess.Minimax(BlackPlayerCurrentState, 4)
 
 

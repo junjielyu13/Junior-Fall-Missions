@@ -18,6 +18,7 @@ from typing import List
 
 RawStateType = List[List[List[int]]]
 
+
 from itertools import permutations
 from collections import defaultdict
 from queue import PriorityQueue, Queue
@@ -60,7 +61,10 @@ class Aichess():
         self.listNextStates = []
         self.listVisitedStates = []
         self.pathToTarget = []
+
         self.innitialStateW = self.chess.board.currentStateW
+        self.innitialStateB = self.chess.board.currentStateB
+        
         self.currentStateW = self.chess.boardSim.currentStateW
         self.currentStateB = self.chess.boardSim.currentStateB
         self.checkMate = False
@@ -112,14 +116,11 @@ class Aichess():
         if (len(self.listVisitedStates) > 0):
             perm_state = list(permutations(mystate))
 
-            isVisited = False
             for j in range(len(perm_state)):
-
                 for k in range(len(self.listVisitedStates)):
-
                     if self.isSameState(list(perm_state[j]), self.listVisitedStates[k]):
-                        isVisited = True
-            return isVisited
+                        return True
+            return False
         else:
             return False
 
@@ -358,6 +359,85 @@ class Aichess():
 
         logging.info("nextState:")
         logging.info(self.getListNextStates(currentState))
+
+
+
+        def Minimax_aux(WhiteState, BlackState, depth, isMaximisingPlayer):
+            if depth == 0:
+
+                if isMaximisingPlayer:
+                    if self.whitePlayer:
+                        pass
+                    else:
+                        pass
+                else:
+                    if self.whitePlayer:
+                        pass
+                    else:
+                        pass
+
+                return point, state
+                
+
+
+            if self.whitePlayer:            # WhitePlayer 
+                if isMaximisingPlayer :     # MAX PAS
+                    value = -float('inf')
+                    for nextState in self.getListNextStates(WhiteState):
+                        self.moveOn(WhiteState, nextState)
+                        point = Minimax_aux(nextState, BlackState, depth-1, False)[0]
+                        if point > value:
+                            value = point
+                            nextchoice = nextState
+                        self.moveOn(nextState, WhiteState)
+                    return value, nextchoice
+                else:                       # MIN PAS
+                    value = float('inf')
+                    for nextState in self.getListNextStates(BlackState):
+                        self.moveOn(BlackState, nextState)
+                        point = Minimax_aux(WhiteState, nextState, depth-1, True)[0]
+                        if point < value:
+                            value = point
+                            nextchoice = nextState
+                        self.moveOn(nextState, BlackState)
+                    return value
+
+
+            else:                           # BlackPlayer 
+                if isMaximisingPlayer :     # MAX PAS
+                    value = -float('inf')
+                    for nextState in self.getListNextStates(BlackState):
+                        self.moveOn(currentState, nextState)
+                        point = Minimax_aux(WhiteState, nextState, depth-1, False)[0]
+                        if point > value:
+                            value = point
+                            nextchoice = nextState
+                        self.moveOn(nextState, BlackState)
+                    return value 
+                else:                       # MIN PAS
+                    point = float('inf')
+                    for nextState in self.getListNextStates(WhiteState):
+                        self.moveOn(currentState, nextState)
+                        value = Minimax_aux(WhiteState, BlackState, depth-1, True)[0]
+                        if point < value:
+                            value = point
+                            nextchoice = nextState
+                        self.moveOn(nextState, WhiteState)
+                    return value
+
+
+
+        # logging.info(self.innitialStateW)
+        # logging.info(self.innitialStateB)
+        # logging.info(self.currentStateW)
+        # logging.info(self.currentStateB)
+        
+        value, nextState = Minimax_aux(self.currentStateW, self.currentStateB, depth, True)
+        
+        return nextState
+
+
+        
     
 
 
