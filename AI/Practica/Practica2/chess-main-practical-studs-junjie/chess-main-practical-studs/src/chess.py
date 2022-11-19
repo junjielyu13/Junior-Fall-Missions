@@ -58,8 +58,9 @@ class Chess():
         self.currentStateW = []  # self.boardSim.currentStateW.copy()
         self.currentStateB = []  # self.boardSim.currentStateB.copy();
 
-    def promotion(self, pos):
 
+
+    def promotion(self, pos):
         pawn = None
         while pawn == None:
             promote = input("Promote pawn to [Q, R, N, B, P(or nothing)]: ")
@@ -174,6 +175,155 @@ class Chess():
                     #print("->piece to state ",self.boardSim.currentStateW[m])
 
                #   print("Next States: ",self.board.getListNextStatesW(self.board.currentStateW[m]))
+
+
+    def moveSimGetPoint(self, start, to, weight):
+        """
+        Moves a piece at `start` to `to`. Does nothing if there is no piece at the starting point.
+        Does nothing if the piece at `start` belongs to the wrong color for the current turn.
+        Does nothing if moving the piece from `start` to `to` is not a valid move.
+
+        start : tup
+            Position of a piece to be moved
+
+        to : tup
+            Position of where the piece is to be moved
+
+        precondition: `start` and `to` are valid positions on the board
+
+        return point for ever move
+        """
+
+        if self.boardSim.board[start[0]][start[1]] == None:
+            # self.boardSim.print_board()
+            logging.critical("There is no piece to move at the start place")
+            return weight
+
+        White = self.boardSim.board[start[0]][start[1]].color
+
+
+        target_piece = self.boardSim.board[start[0]][start[1]]
+        end_piece    = self.boardSim.board[to[0]][to[1]]
+
+        is_end_piece = end_piece != None
+
+        # Checks if a player's own piece is at the `to` coordinate
+        if is_end_piece and target_piece.color == end_piece.color:
+            return weight
+
+
+        # Check if a player move piece is valid move
+        if target_piece.is_valid_move(self.boardSim, start, to):
+
+            # Special check for if the move is castling
+            # Board reconfiguration is handled in Piece
+            if target_piece.name == 'K' and abs(start[1] - to[1]) == 2:
+
+                print("castled")
+
+                if self.turn and self.black_ghost_piece:
+                    self.boardSim.board[self.black_ghost_piece[0]][self.black_ghost_piece[1]] = None
+                elif not self.turn and self.white_ghost_piece:
+                    self.boardSim.board[self.white_ghost_piece[0]][self.white_ghost_piece[1]] = None
+                self.turn = not self.turn
+                return
+
+
+           
+            if self.boardSim.board[to[0]][to[1]]:  # Eat piece 
+
+                
+                #if self.turn:
+                if White:
+                    print("My turn: " + str(self.boardSim.board[to[0]][to[1]]) + " taken.")
+                    logging.warning("My turn: " + str(self.boardSim.board[to[0]][to[1]]) + " taken.")
+                    weight += self.boardSim.board[to[0]][to[1]].point
+                else:
+                    print("Opps turn: " + str(self.boardSim.board[to[0]][to[1]]) + " taken.")
+                    logging.warning("Opps turn: " + str(self.boardSim.board[to[0]][to[1]]) + " taken.")
+                    weight -= self.boardSim.board[to[0]][to[1]].point
+
+                # Special logic for ghost piece, deletes the actual pawn that is not in the `to`
+                # coordinate from en passant
+                if self.boardSim.board[to[0]][to[1]].name == "GP":
+                    if self.turn:
+                        self.boardSim.board[self.black_ghost_piece[0] + 1][self.black_ghost_piece[1]] = None
+                        self.black_ghost_piece = None
+                    else:
+                        self.boardSim.board[self.white_ghost_piece[0] - 1][self.black_ghost_piece[1]] = None
+                        self.white_ghost_piece = None
+
+
+
+
+                # Remove piece on the list
+
+                pieceToDelete = [to[0], to[1], self.boardSim.board[to[0]][to[1]].pieceNum]
+
+                logging.debug("piece to delete")
+                logging.debug(pieceToDelete)
+
+                if not White:
+                    logging.debug("self.boardSim.currentStateW")
+                    logging.debug(self.boardSim.currentStateW)
+                    if pieceToDelete in self.boardSim.currentStateW:
+                        self.boardSim.currentStateW.remove(pieceToDelete)
+                        logging.debug("white after remove self.boardSim.currentStateW")
+                        logging.debug(self.boardSim.currentStateW)
+                        self.boardSim.currentStateW = copy.deepcopy(self.boardSim.currentStateW)
+                    else:
+                        logging.critical("White: doesn't have a piece to delete")
+                else:
+                    if pieceToDelete in self.boardSim.currentStateB:
+                        logging.debug(self.boardSim.currentStateB)
+                        self.boardSim.currentStateB.remove(pieceToDelete)
+                        logging.debug("blakc after remove self.boardSim.currentStateW")
+                        logging.debug(self.boardSim.currentStateB)
+                        self.boardSim.currentStateB = copy.deepcopy(self.boardSim.currentStateB)
+                    else:
+                        logging.critical("black: doesn't have a piece to delete")
+
+
+            else:                                   # Just a move
+                weight += 0
+
+
+            # move piece
+            self.boardSim.board[to[0]][to[1]] = target_piece
+            self.boardSim.board[start[0]][start[1]] = None
+
+
+            if self.turn and self.black_ghost_piece:
+                self.boardSim.board[self.black_ghost_piece[0]][self.black_ghost_piece[1]] = None
+            elif not self.turn and self.white_ghost_piece:
+                self.boardSim.board[self.white_ghost_piece[0]][self.white_ghost_piece[1]] = None
+
+
+
+            # alternate player
+            #self.turn = not self.turn
+
+
+            
+            if White:
+                # AI state change - identify change to make in state
+                for m in range(len(self.boardSim.currentStateW)):
+                    aa = self.boardSim.currentStateW[m]
+                    # only the one to move and only for whites so far
+                    if self.boardSim.listNames[int(aa[2]-1)] == str(target_piece) and target_piece.color:
+                        self.boardSim.currentStateW[m][0] = to[0]
+                        self.boardSim.currentStateW[m][1] = to[1]
+            else:
+                # AI state change - identify change to make in state
+                for m in range(len(self.boardSim.currentStateB)):
+                    aa = self.boardSim.currentStateB[m]
+                    # only the one to move and only for black so far
+                    if self.boardSim.listNames[int(aa[2]-1)] == str(target_piece) and target_piece.color:
+                        self.boardSim.currentStateB[m][0] = to[0]
+                        self.boardSim.currentStateB[m][1] = to[1]
+
+        # logging.warning(weight)
+        return weight 
 
 
 
@@ -294,6 +444,71 @@ def translate(s):
         return None
 
 
+def inputGame():
+
+    # intiialize board
+    # current state initialization
+    TA = np.zeros((8, 8))
+
+
+    # # white pieces
+    # TA[[6, ]] = 1  # white pawn
+    # TA[7][0] = 2   # white rook
+    # TA[7][1] = 3   # white knight
+    # TA[7][2] = 4   # white bishop
+    # TA[7][3] = 6   # white king
+    # TA[7][4] = 5   # white queen
+    # TA[7][5] = 4   # white bishop
+    # TA[7][6] = 3   # white knight
+    # TA[7][7] = 2   # white rook
+    # # black pieces
+    # TA[[1, ]] = 7  # black pawn
+    # TA[0][0] = 8   # black rook
+    # TA[0][1] = 9   # black knight
+    # TA[0][2] = 10  # black bishop
+    # TA[0][3] = 11  # black queen
+    # TA[0][4] = 12  # black king
+    # TA[0][5] = 10  # black bishop
+    # TA[0][6] = 9   # black knight
+    # TA[0][7] = 8   # black rook
+
+    # initialize board
+    chess = Chess(TA)
+    chess.board.print_board()
+    
+    chess.board.print_board()
+    while True:
+
+        start = input("From: ")
+        to = input("To: ")
+
+        start = translate(start)
+        to = translate(to)
+
+        if start == None or to == None:
+            continue
+
+        chess.move(start, to)
+
+        # check for promotion pawns
+        i = 0
+        while i < 8:
+            if not chess.turn and chess.board.board[0][i] != None and \
+                    chess.board.board[0][i].name == 'P':
+                chess.promotion((0, i))
+                break
+            elif chess.turn and chess.board.board[7][i] != None and \
+                    chess.board.board[7][i].name == 'P':
+                chess.promotion((7, i))
+                break
+            i += 1
+
+        chess.board.print_board()
+
+
+
+def GameOver():
+    pass
 
 
 
@@ -339,6 +554,7 @@ if __name__ == "__main__":
 
     # initialize board
     chess = Chess(TA)
+    chess.board.print_board()
     #  chess = Chess([],False)
 
 
@@ -356,37 +572,18 @@ if __name__ == "__main__":
 
 
     logging.info("minimax: ")
-    WhitePlayerMinimax.Minimax(WhitePlayerCurrentState, 4)
-    BlackPlayerAichess.Minimax(BlackPlayerCurrentState, 4)
+    WhitePlayerNextState = WhitePlayerMinimax.Minimax(WhitePlayerCurrentState, 2)
+
+    logging.critical("minimax: ")
+    logging.critical(WhitePlayerCurrentState)
+    logging.critical(WhitePlayerNextState)
+    
+    # BlackPlayerAichess.Minimax(BlackPlayerCurrentState, 4)
 
 
     # print board
     chess.board.print_board()
 
-    while True:
-
-        start = input("From: ")
-        to = input("To: ")
-
-        start = translate(start)
-        to = translate(to)
-
-        if start == None or to == None:
-            continue
-
-        chess.move(start, to)
-
-        # check for promotion pawns
-        i = 0
-        while i < 8:
-            if not chess.turn and chess.board.board[0][i] != None and \
-                    chess.board.board[0][i].name == 'P':
-                chess.promotion((0, i))
-                break
-            elif chess.turn and chess.board.board[7][i] != None and \
-                    chess.board.board[7][i].name == 'P':
-                chess.promotion((7, i))
-                break
-            i += 1
-
-        chess.board.print_board()
+    
+    # while True:
+    #     pass

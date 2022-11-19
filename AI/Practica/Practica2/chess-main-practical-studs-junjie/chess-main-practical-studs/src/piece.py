@@ -1,3 +1,5 @@
+from lib import initLogging, logging
+
 blocked_path = "There's a piece in the path."
 incorrect_path = "This piece does not move in this pattern."
 
@@ -235,12 +237,24 @@ class Piece():
 
     color : bool
         True if piece is white
+
+    point : int
+        point of piece
+
+    state : bool
+        True  --> piece is live
+        Flase --> piece is dead
+
+    pieceNum : int
+        number of piece 
     """
 
     def __init__(self, color):
         self.name = ""
         self.color = color
         self.point = 0
+        self.state = True
+        self.pieceNum = -1
 
     def is_valid_move(self, board, start, to):
         '''
@@ -285,6 +299,11 @@ class Rook(Piece):
         self.first_move = first_move
         self.point = POINT_Rook
 
+        if color:
+            self.pieceNum = 2
+        else:
+            self.pieceNum = 8
+
     def is_valid_move(self, board, start, to):
         if start[0] == to[0] or start[1] == to[1]:
             return check_updown(board, start, to)
@@ -300,6 +319,11 @@ class Knight(Piece):
         super().__init__(color)
         self.name = "N"
         self.point = POINT_Knight
+
+        if color:
+            self.pieceNum = 3
+        else:
+            self.pieceNum = 9
 
     def is_valid_move(self, board, start, to):
         if abs(start[0] - to[0]) == 2 and abs(start[1] - to[1]) == 1:
@@ -319,6 +343,12 @@ class Bishop(Piece):
         self.name = "B"
         self.point = POINT_Bishop
 
+        if color:
+            self.pieceNum = 4
+        else:
+            self.pieceNum = 10
+
+
     def is_valid_move(self, board, start, to):
         return check_diag(board, start, to)
 
@@ -329,6 +359,11 @@ class Queen(Piece):
         super().__init__(color)
         self.name = "Q"
         self.point = POINT_Queen
+
+        if color:
+            self.pieceNum = 5
+        else:
+            self.pieceNum = 11
 
     def is_valid_move(self, board, start, to):
         # diagonal
@@ -353,6 +388,11 @@ class King(Piece):
         self.name = "K"
         self.first_move = first_move
         self.point = POINT_King
+
+        if color:
+            self.pieceNum = 6
+        else:
+            self.pieceNum = 12
 
 
     def can_castle(self, board, start, to, right):
@@ -527,6 +567,12 @@ class Pawn(Piece):
         self.name = "P"
         self.first_move = True
         self.point = POINT_Pawn
+
+        if color:
+            self.pieceNum = 1
+        else:
+            self.pieceNum = 7
+
 
     def is_valid_move(self, board, start, to):
         if self.color:
