@@ -507,6 +507,14 @@ def inputGame():
 
 
 
+def movePiece(aichess, currentState, nextState):
+    # TODO MMOVE
+    start = [e for e in currentState if e not in nextState][0][0:2]
+    to = [e for e in nextState if e not in currentState][0][0:2]
+    aichess.chess.move(start, to)
+    return
+
+
 def GameOver():
     pass
 
@@ -545,7 +553,7 @@ if __name__ == "__main__":
 
     # white pieces
     TA[7][5] = 6        # white king
-    TA[7][0] = 2        # white rook
+    TA[6][5] = 2        # white rook
 
     # black pieces
     TA[0][5] = 12       # black king
