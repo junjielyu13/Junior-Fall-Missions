@@ -49,14 +49,15 @@ class Aichess():
         Promotes a pawn that has reached the other side to another, or the same, piece
     """
 
-    def __init__(self, TA, WhiteTurn, myinit=True):
+    def __init__(self, TA, White, myinit=True):
 
         if myinit:
             self.chess = chess.Chess(TA, True)
         else:
             self.chess = chess.Chess([], False)
 
-        self.whiteTurn = WhiteTurn
+        self.whitePlayer = White
+        self.whiteTurn = White
         
         self.listNextStates = []
 
@@ -145,19 +146,42 @@ class Aichess():
         @return --> bool:
             return true if is Checkmate otherwise false
         '''
+        
+        if self.whiteTurn:
+            for state in self.currentStateB:                                    # Get black King position
+                if state[2] == 12:
+                    black_king_pos = state                                      
 
-        black_king_pos = self.currentStateB[0]                              # Get black King position
-        white_rook_pos = mystate[0] if mystate[0][2] == 2 else mystate[1]   # Get white Rook position
-        white_king_pos = mystate[1] if mystate[1][2] == 6 else mystate[0]   # Get white King position
+            white_rook_pos = mystate[0] if mystate[0][2] == 2 else mystate[1]   # Get white Rook position
+            white_king_pos = mystate[1] if mystate[1][2] == 6 else mystate[0]   # Get white King position
 
-        # Check if black King is in the checkmate range
-        if (white_king_pos[1] != black_king_pos[1]) or \
-            (white_rook_pos[0] != black_king_pos[0]) or \
-            (white_king_pos[0] - 2 != black_king_pos[0]) or \
-            (white_rook_pos[1] in {black_king_pos[1]-1, black_king_pos[1], black_king_pos[1]+1}) :
-            return False
+            # Check if black King is in the checkmate range
+            if ((white_king_pos[1] != black_king_pos[1]) or
+                (white_rook_pos[0] != black_king_pos[0]) or 
+                (white_king_pos[0] - 2 != black_king_pos[0]) or
+                (white_rook_pos[1] in {black_king_pos[1]-1, black_king_pos[1], black_king_pos[1]+1}) 
+               ):
+                return False
 
-        return True
+            return True
+        else:
+            for state in self.currentStateW:                                    # Get black King position
+                if state[2] == 6:
+                    white_king_pos = state        
+
+            black_rook_pos = mystate[0] if mystate[0][2] == 8  else mystate[1]   # Get white Rook position
+            black_king_pos = mystate[1] if mystate[1][2] == 12 else mystate[0]   # Get white King position
+
+            # Check if white King is in the checkmate range
+            if ((black_king_pos[1] != white_king_pos[1]) or
+                (black_rook_pos[0] != white_king_pos[0]) or 
+                (black_king_pos[0] - 2 != white_king_pos[0]) or
+                (black_rook_pos[1] in {white_king_pos[1]-1, white_king_pos[1], white_king_pos[1]+1}) 
+               ):
+                return False
+
+            return True
+
 
 
     def getPath(self, start, to):
@@ -181,7 +205,6 @@ class Aichess():
             state = self.path[tuple(tuple(piece) for piece in sorted(state))]
             path.append(state)
         return path[::-1]
-
 
 
     def moveOn(self, currentState, nextState):
@@ -383,9 +406,10 @@ class Aichess():
         
         logging.error("start: ")
         logging.error(start)
+        logging.error("start: ")
+        logging.error(to)
 
         point = self.chess.moveSimGetPoint(start, to, weight)
-
         return point
 
 
@@ -396,10 +420,8 @@ class Aichess():
 
         def Minimax_aux(WhiteState, BlackState, depth, isMaximisingPlayer, weight):
 
-            logging.info(f"depth: {depth}")
             
-
-            if depth == 0:
+            if depth == 0 or WhiteState == None or BlackState == None:
                 if isMaximisingPlayer:
                     if self.whiteTurn:
                         state = WhiteState
@@ -411,36 +433,41 @@ class Aichess():
                     else:
                         state = WhiteState
                 
-                logging.info(f"weight: {weight}")
+                logging.info(f"depth: {depth}; weight: {weight}")
+
+                if state == None:
+                    logging.critical("no state")
+
                 return weight, state
                 
 
+            logging.info(f"depth: {depth}")
 
-            if self.whiteTurn:            
-                if isMaximisingPlayer :     # MAX PAS
+
+            if self.whitePlayer:            # WHITE PLAYER ONLY   
+                if isMaximisingPlayer:      # WHITE PLAYER WHITE TRUN
                     value = -float('inf')
 
+                    self.whiteTurn = True    # Now is White turn
                     WhiteListNextStates = self.getListNextStates(WhiteState)
-                    self.whiteTurn = False   # turn to black
 
-
-                                        
-                    logging.info("white currentstate: ")
-                    logging.debug(WhiteState)
-
-                    logging.info("white nextstate: ")
+                    logging.info(f"WHITE PLAYER WHITE TRUN currentstate: {WhiteState}")
+                    logging.info("WHITE PLAYER WHITE TRUN nextstate: ")
                     logging.debug(WhiteListNextStates)
 
+
                     self.listVisitedStatesW.append(WhiteState)
-                    
                     whiteOnState = copy.deepcopy(WhiteState)
                     whiteBackState = copy.deepcopy(WhiteState)
+                    nextchoice = []
                     for nextState in WhiteListNextStates:
                         if nextState not in self.listVisitedStatesW:
 
-                            logging.debug("white move on")
+                            logging.debug(f"WHITE PLAYER WHITE TRUN move on {depth}")
 
                             nextChess = copy.deepcopy(self.chessStack[-1])
+                            nextChess.whitePlayer = True
+                            nextChess.whiteTurn = True
                             self.chess = copy.deepcopy(nextChess)
                             moveWeight = self.moveOnPoint(whiteOnState, nextState, weight)
                             self.chessStack.append(copy.deepcopy(self.chess))
@@ -448,12 +475,17 @@ class Aichess():
                             BlackState = copy.deepcopy(self.chess.boardSim.currentStateB)
                             point_state = Minimax_aux(nextState, BlackState, depth-1, False, moveWeight)
                             point = point_state[0]
+                            
                             if point > value:
                                 value = point
                                 nextchoice = nextState
+                            if nextchoice == None:
+                                nextchoice = nextState
                             
 
-                            logging.debug("white move back")
+                            logging.debug(f"WHITE PLAYER WHITE TRUN move back {depth}")
+                            logging.warning(f"white currentstate: {WhiteState}")
+                            logging.warning(f"BlackState currentstate: {BlackState}")
                             #moveWeight -= self.moveOnPoint(nextState, whiteBackState, weight)
 
                             lastState = self.chessStack.pop()
@@ -465,61 +497,32 @@ class Aichess():
                                 self.listVisitedStatesW.pop()      
                     return value, nextchoice
 
-                else:                       # MIN PAS
-
-                    # self.whiteTurn = True
-                    point = float('inf')
-                    for nextState in self.getListNextStates(WhiteState):
-                        moveWeight = self.moveOnPoint(currentState, nextState, weight)
-                        value = Minimax_aux(WhiteState, BlackState, depth-1, True, moveWeight)[0]
-                        if point < value:
-                            value = point
-                            nextchoice = nextState
-                        moveWeight = self.moveOnPoint(nextState, WhiteState, weight)
-                    return value, nextchoice
-
-
-            #--------------------------------------------------------------------------------------------------------------------------------
-
-            else:                           # BlackPlayer 
-                if isMaximisingPlayer :     # MAX PAS
-                    self.whiteTurn = False
-                    value = -float('inf')
-                    for nextState in self.getListNextStates(BlackState):
-                        moveWeight = self.moveOnPoint(currentState, nextState, weight)
-                        point = Minimax_aux(WhiteState, nextState, depth-1, False, moveWeight)[0]
-                        if point > value:
-                            value = point
-                            nextchoice = nextState
-                        moveWeight = self.moveOnPoint(nextState, BlackState, weight)
-                    return value, nextchoice
-
-
-                else:                       # MIN PAS
-                    
+                else:                           # WHITE PLAYER BLACK TRUN
                     value = float('inf')
 
 
+                    self.whiteTurn = False   # now is black turn
                     BlackListNextStates = self.getListNextStates(BlackState)
-                    self.whiteTurn = False   # turn to black
-    
 
-                    logging.info("black currentstate: ")
-                    logging.debug(BlackState)
-                    
-                    logging.info("black nextstate: ")
+
+
+                    logging.info(f"WHITE PLAYER BLACK TRUN currentstate: {BlackState}")
+                    logging.info("WHITE PLAYER BLACK TRUN nextstate: ")
                     logging.debug(BlackListNextStates)
 
-                    self.listVisitedStatesB.append(BlackState)
 
+                    self.listVisitedStatesB.append(BlackState)
                     BlackOnState = copy.deepcopy(BlackState)
                     BlackBackState = copy.deepcopy(BlackState)
+                    nextchoice = []
                     for nextState in BlackListNextStates:
-                        if nextState not in self.listVisitedStatesW:
+                        if nextState not in self.listVisitedStatesB:
 
-                            logging.debug("black move on")
+                            logging.debug(f"WHITE PLAYER BLACK TRUN move on {depth}")
 
                             nextChess = copy.deepcopy(self.chessStack[-1])
+                            nextChess.whitePlayer = True
+                            nextChess.whiteTurn = False
                             self.chess = copy.deepcopy(nextChess)
                             moveWeight = self.moveOnPoint(BlackOnState, nextState, weight)
                             self.chessStack.append(copy.deepcopy(self.chess))
@@ -530,8 +533,12 @@ class Aichess():
                             if point < value:
                                 value = point
                                 nextchoice = nextState
+                            if nextchoice == None:
+                                nextchoice = nextState
 
-                            logging.debug("black move back")
+                            logging.debug(f"WHITE PLAYER BLACK TRUN move back: {depth}")
+                            logging.warning(f"white currentstate: {WhiteState}")
+                            logging.warning(f"BlackState currentstate: {BlackState}")
                             #moveWeight -= self.moveOnPoint(nextState, BlackBackState, weight)
                             lastState = self.chessStack.pop()
                             # prevChess = copy.deepcopy(self.chessStack[-1])
@@ -544,9 +551,106 @@ class Aichess():
 
                     return value, nextchoice
 
+
+            else:                           # BLACK PLAYER BLACK TRUN
+                if isMaximisingPlayer :     
+                    value = -float('inf')
+
+                    self.whiteTurn = False      # Now is Black turn
+                    BlackListNextStates = self.getListNextStates(BlackState)
+                    
+                    logging.info("BLACK PLAYER BLACK TRUN currentstate: ")
+                    logging.debug(BlackState)
+                    logging.info("BLACK PLAYER BLACK TRUN nextstate: ")
+                    logging.debug(BlackListNextStates)
+
+                    self.listVisitedStatesB.append(BlackState)
+                    BlackOnState = copy.deepcopy(BlackState)
+                    BlackBackState = copy.deepcopy(BlackState)
+                    
+                    nextchoice = []
+                    for nextState in BlackListNextStates:
+                        if nextState not in self.listVisitedStatesB:
+                            
+                            logging.debug("BLACK PLAYER BLACK TRUN move on")
+
+                            nextChess = copy.deepcopy(self.chessStack[-1])
+                            nextChess.whitePlayer = False
+                            nextChess.whiteTurn = False
+                            self.chess = copy.deepcopy(nextChess)                        
+                            moveWeight = self.moveOnPoint(BlackOnState, nextState, weight)
+                            self.chessStack.append(copy.deepcopy(self.chess))
+                            
+                            WhiteState = copy.deepcopy(self.chess.boardSim.currentStateW)
+                            point_state = Minimax_aux(WhiteState, nextState, depth-1, False, moveWeight)
+                            point = point_state[0]
+                            if point > value:
+                                value = point
+                                nextchoice = nextState
+                            if nextchoice == None:
+                                nextchoice = nextState
+                            
+                            logging.debug("BLACK PLAYER BLACK TRUN move back")
+                            #moveWeight = self.moveOnPoint(nextState, BlackState, weight)
+                            lastState = self.chessStack.pop()
+                            if len(self.listVisitedStatesB) != 0:   
+                                self.listVisitedStatesB.pop()  
+
+                    return value, nextchoice
+
+
+                else:                      # WHITE PLAYER BLACK TRUN
+                    value = float('inf')
+                    
+                    self.whiteTurn = True   # now is white turn
+                    WhiteListNextStates = self.getListNextStates(WhiteState)
+
+                    logging.info("BLACK PLAYER WHITE TRUN currentstate: ")
+                    logging.debug(WhiteState)
+                    logging.info("BLACK PLAYER WHITE TRUN nextstate: ")
+                    logging.debug(WhiteListNextStates)
+
+
+
+                    self.listVisitedStatesW.append(WhiteState)
+                    whiteOnState = copy.deepcopy(WhiteState)
+                    whiteBackState = copy.deepcopy(WhiteState)
+                    nextchoice = []
+                    for nextState in WhiteListNextStates:
+                        if nextState not in self.listVisitedStatesW:
+
+                            logging.debug("BLACK PLAYER WHITE TRUN move on")
+
+                            nextChess = copy.deepcopy(self.chessStack[-1])
+                            nextChess.whitePlayer = False
+                            nextChess.whiteTurn = True
+                            self.chess = copy.deepcopy(nextChess)
+                            moveWeight = self.moveOnPoint(whiteOnState, nextState, weight)
+                            self.chessStack.append(copy.deepcopy(self.chess))
+
+                            WhiteState = copy.deepcopy(self.chess.boardSim.currentStateB)
+                            point_state = Minimax_aux(nextState, BlackState, depth-1, True, moveWeight)
+                            point = point_state[0]
+                            if point < value:
+                                value = point
+                                nextchoice = nextState
+                            if nextchoice == None:
+                                nextchoice = nextState
+
+                            #moveWeight = self.moveOnPoint(nextState, WhiteState, weight)
+
+                            logging.debug("BLACK PLAYER WHITE TRUN move back")
+                            lastState = self.chessStack.pop()
+                            if len(self.listVisitedStatesW) != 0:   
+                                self.listVisitedStatesW.pop()   
+
+                    return value, nextchoice
+
+
         
         value, nextState = Minimax_aux(self.currentStateW, self.currentStateB, depth, True, 0)
         
+        print(f"final value: {value}")
         return nextState
 
 

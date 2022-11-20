@@ -176,7 +176,7 @@ def check_updown_castle(color, board, start, to):
     return True
 
 
-def check_updown(board, start, to):
+def  check_updown(board, start, to):
     """
     Checks if there are no pieces along the vertical or horizontal path
     from `start` (non-inclusive) to `to` (non-inclusive). 
@@ -209,7 +209,6 @@ def check_updown(board, start, to):
                 print(blocked_path)
                 return False
         return True
-
 
 
 
@@ -535,6 +534,9 @@ class King(Piece):
 
             return True
 
+
+
+
     def is_valid_move(self, board, start, to):
         if self.first_move and abs(start[1] - to[1]) == 2 and start[0] - to[0] == 0:
             return self.can_castle(board, start, to, to[1] - start[1] > 0)
@@ -546,6 +548,19 @@ class King(Piece):
 
         #print(incorrect_path)
         return False
+
+
+
+    def isCheckMateCaseForRook(self, board):
+
+        if self.color:  # white king
+            pass
+
+        else:           # black king
+            pass
+
+
+        return True
 
 
 class GhostPawn(Piece):
