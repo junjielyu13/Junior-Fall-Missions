@@ -3,6 +3,7 @@ from lib import initLogging, logging
 blocked_path = "There's a piece in the path."
 incorrect_path = "This piece does not move in this pattern."
 
+
 POINT_None   = 0
 POINT_Pawn   = 10
 POINT_Knight = 30
@@ -10,26 +11,6 @@ POINT_Bishop = 30
 POINT_Rook   = 50
 POINT_Queen  = 90
 POINT_King   = 900
-
-
-# def getPiecePoints(state):
-#     piece = state[2]
-
-#     if piece == 1 or piece == 7:
-#         return POINT_Pawn
-#     elif piece == 2 or piece == 8:
-#         return POINT_Rook
-#     elif piece == 3 or piece == 9:
-#         return POINT_Knight
-#     elif piece == 4 or piece == 10:
-#         return POINT_Bishop
-#     elif piece == 5 or piece == 11:
-#         return POINT_Queen
-#     elif piece == 6 or piece == 12:
-#         return POINT_King
-#     else:
-#         return POINT_None
-
 
 
 

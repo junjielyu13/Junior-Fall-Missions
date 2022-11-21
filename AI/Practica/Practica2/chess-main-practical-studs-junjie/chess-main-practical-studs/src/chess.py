@@ -660,6 +660,8 @@ if __name__ == "__main__":
     # print board
     chess.board.print_board()
 
+
+
     
     WhitePlayerAichess = aichess.Aichess(TA, True, True)
     WhitePlayerCurrentState = WhitePlayerAichess.chess.board.currentStateW.copy()
@@ -668,21 +670,119 @@ if __name__ == "__main__":
     BlackPlayerCurrentState = BlackPlayerAichess.chess.board.currentStateB.copy()
 
 
-    WhitePlayerMinimax = copy.deepcopy(WhitePlayerAichess)
-    BlackPlayerMinimax = copy.deepcopy(BlackPlayerAichess)
+    # WhitePlayerMinimax = copy.deepcopy(WhitePlayerAichess)
+    # BlackPlayerMinimax = copy.deepcopy(BlackPlayerAichess)
 
     # WhitePlayerNextState = WhitePlayerMinimax.Minimax(WhitePlayerCurrentState, 4)
     # logging.critical("minimax WHITE: ")
     # logging.critical(WhitePlayerCurrentState)
     # logging.critical(WhitePlayerNextState)
 
-    # BlackPlayerNextState = BlackPlayerMinimax.Minimax(BlackPlayerCurrentState, 3)
+    # BlackPlayerNextState = BlackPlayerMinimax.Minimax(BlackPlayerCurrentState, 4)
     # logging.critical("minimax BLACK: ")
     # logging.critical(BlackPlayerCurrentState)
     # logging.critical(BlackPlayerNextState)
 
-    chessTable = Queue(12)    
-    chessTable.put(chess.board)
+    # chessTable = Queue(12)    
+    # chessTable.put(chess.board)
+
+    # while not GameOver(chess.board.board):
+
+    #     # ----------------White Player -------------------------------- #
+    #     print("White player minimax: ")
+    #     WhitePlayerCurrentState = chess.board.currentStateW
+    #     WhitePlayerMinimax.chess.boardSim = chess.board
+    #     WhitePlayerMinimax.currentStateW = chess.board.currentStateW
+    #     WhitePlayerMinimax.currentStateB = chess.board.currentStateB
+    #     WhitePlayerNextState = WhitePlayerMinimax.Minimax(WhitePlayerCurrentState, 2)
+
+    #     logging.critical("minimax WHITE: ")
+    #     logging.critical(WhitePlayerCurrentState)
+    #     logging.critical(WhitePlayerNextState)
+    #     print(WhitePlayerCurrentState)
+    #     print(WhitePlayerNextState)
+
+    #     movePiece(chess, WhitePlayerCurrentState, WhitePlayerNextState)
+    #     chess.board.print_board()
+
+    #     if GameOver(chess.board.board):
+    #         break
+        
+    #     # chessTable.put(chess.board)
+    #     # if chessTable.qsize() >= 12:
+    #     #     chesslist = chessTable.queue
+            
+    #     #     if ( (chesslist[0] == chesslist[4] and chesslist[4] == chesslist[8]) and 
+    #     #          (chesslist[1] == chesslist[5] and chesslist[5] == chesslist[9]) and 
+    #     #          (chesslist[2] == chesslist[6] and chesslist[6] == chesslist[10]) and 
+    #     #          (chesslist[3] == chesslist[7] and chesslist[7] == chesslist[11]) 
+    #     #         ):
+
+    #     #         print("white empate")
+    #     #         break
+    #     #     chessTable.get()
+
+
+
+
+
+    #     # ----------------Black Player -------------------------------- #
+    #     print("Black player minimax: ")
+    #     BlackPlayerCurrentState = chess.board.currentStateB
+    #     BlackPlayerMinimax.chess.boardSim = chess.board
+    #     BlackPlayerMinimax.currentStateW = chess.board.currentStateW
+    #     BlackPlayerMinimax.currentStateB = chess.board.currentStateB
+    #     BlackPlayerNextState = BlackPlayerMinimax.Minimax(BlackPlayerCurrentState, 2)
+    #     logging.critical("minimax BLACK: ")
+    #     logging.critical(BlackPlayerCurrentState)
+    #     logging.critical(BlackPlayerNextState)
+    #     print(BlackPlayerCurrentState)
+    #     print(BlackPlayerNextState)
+
+    #     movePiece(chess, BlackPlayerCurrentState, BlackPlayerNextState)
+    #     chess.board.print_board()
+
+    #     if GameOver(chess.board.board):
+    #         break
+        
+        
+    #     # chessTable.put(chess.board)
+    #     # if chessTable.qsize() >= 12:
+    #     #     chesslist = chessTable.queue
+            
+    #     #     if ( (chesslist[0] == chesslist[4] and chesslist[4] == chesslist[8]) and 
+    #     #          (chesslist[1] == chesslist[5] and chesslist[5] == chesslist[9]) and 
+    #     #          (chesslist[2] == chesslist[6] and chesslist[6] == chesslist[10]) and 
+    #     #          (chesslist[3] == chesslist[7] and chesslist[7] == chesslist[11]) 
+    #     #         ):
+
+    #     #         print("black empate")
+    #     #         break
+    #     #     chessTable.get()
+
+
+
+
+    # -----------------------------------------------------------------------------
+
+
+
+
+    WhitePlayerMinimax = copy.deepcopy(WhitePlayerAichess)
+    BlackPlayerMinimax = copy.deepcopy(BlackPlayerAichess)
+
+    # WhitePlayerNextState = WhitePlayerMinimax.AlfaBeta(WhitePlayerCurrentState, 3)
+    # logging.critical("minimax WHITE: ")
+    # logging.critical(WhitePlayerCurrentState)
+    # logging.critical(WhitePlayerNextState)
+
+    # BlackPlayerNextState = BlackPlayerMinimax.AlfaBeta(BlackPlayerCurrentState, 3)
+    # logging.critical("minimax BLACK: ")
+    # logging.critical(BlackPlayerCurrentState)
+    # logging.critical(BlackPlayerNextState)
+
+    # chessTable = Queue(12)    
+    # chessTable.put(chess.board)
 
     while not GameOver(chess.board.board):
 
@@ -692,7 +792,7 @@ if __name__ == "__main__":
         WhitePlayerMinimax.chess.boardSim = chess.board
         WhitePlayerMinimax.currentStateW = chess.board.currentStateW
         WhitePlayerMinimax.currentStateB = chess.board.currentStateB
-        WhitePlayerNextState = WhitePlayerMinimax.Minimax(WhitePlayerCurrentState, 2)
+        WhitePlayerNextState = WhitePlayerMinimax.AlfaBeta(WhitePlayerCurrentState, 4)
 
         logging.critical("minimax WHITE: ")
         logging.critical(WhitePlayerCurrentState)
@@ -705,22 +805,6 @@ if __name__ == "__main__":
 
         if GameOver(chess.board.board):
             break
-        
-        chessTable.put(chess.board)
-        if chessTable.qsize() >= 12:
-            chesslist = chessTable.queue
-            
-            if ( (chesslist[0] == chesslist[4] and chesslist[4] == chesslist[8]) and 
-                 (chesslist[1] == chesslist[5] and chesslist[5] == chesslist[9]) and 
-                 (chesslist[2] == chesslist[6] and chesslist[6] == chesslist[10]) and 
-                 (chesslist[3] == chesslist[7] and chesslist[7] == chesslist[11]) 
-                ):
-
-                print("white empate")
-                break
-            chessTable.get()
-
-
 
 
         # ----------------Black Player -------------------------------- #
@@ -729,7 +813,7 @@ if __name__ == "__main__":
         BlackPlayerMinimax.chess.boardSim = chess.board
         BlackPlayerMinimax.currentStateW = chess.board.currentStateW
         BlackPlayerMinimax.currentStateB = chess.board.currentStateB
-        BlackPlayerNextState = BlackPlayerMinimax.Minimax(BlackPlayerCurrentState, 2)
+        BlackPlayerNextState = BlackPlayerMinimax.AlfaBeta(BlackPlayerCurrentState, 4)
         logging.critical("minimax BLACK: ")
         logging.critical(BlackPlayerCurrentState)
         logging.critical(BlackPlayerNextState)
@@ -742,21 +826,5 @@ if __name__ == "__main__":
         if GameOver(chess.board.board):
             break
         
-        
-        chessTable.put(chess.board)
-        if chessTable.qsize() >= 12:
-            chesslist = chessTable.queue
-            
-            if ( (chesslist[0] == chesslist[4] and chesslist[4] == chesslist[8]) and 
-                 (chesslist[1] == chesslist[5] and chesslist[5] == chesslist[9]) and 
-                 (chesslist[2] == chesslist[6] and chesslist[6] == chesslist[10]) and 
-                 (chesslist[3] == chesslist[7] and chesslist[7] == chesslist[11]) 
-                ):
-
-                print("black empate")
-                break
-            chessTable.get()
 
 
-    # while True:
-    #     pass
