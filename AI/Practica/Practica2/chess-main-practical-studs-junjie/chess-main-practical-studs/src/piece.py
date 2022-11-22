@@ -5,12 +5,12 @@ incorrect_path = "This piece does not move in this pattern."
 
 
 POINT_None   = 0
-POINT_Pawn   = 10
-POINT_Knight = 30
-POINT_Bishop = 30
-POINT_Rook   = 50
-POINT_Queen  = 90
-POINT_King   = 900
+POINT_Pawn   = 1000
+POINT_Knight = 3000
+POINT_Bishop = 3000
+POINT_Rook   = 5000
+POINT_Queen  = 9000
+POINT_King   = 100000
 
 
 

@@ -301,8 +301,87 @@ class Chess():
                         logging.debug(self.boardSim.currentStateB)
 
             else:                                   # Just a move
-                weight += 0
+                # evaluate heuristica
 
+                heuristica = 0
+
+                pos = [0,0]
+                Ourpos = [0,0]
+                for i in range(8):
+                    for j in range(8):
+                        if self.boardSim.board[i][j] != None and self.boardSim.board[i][j].name == 'K' and self.boardSim.board[start[0]][start[1]].color != self.boardSim.board[i][j].color:
+                            oppsiteKing = self.boardSim.board[i][j]
+                            pos[0] = i
+                            pos[1] = j
+                        if self.boardSim.board[i][j] != None and self.boardSim.board[i][j].name == 'K' and target_piece.color == self.boardSim.board[i][j].color:
+                            Ourpos[0] = i
+                            Ourpos[1] = j
+
+                if target_piece.name == 'K':
+                    distEuclide = abs(start[0] - pos[0]) + abs(start[1] - pos[1])
+                    if distEuclide == 3 and (start[0] != pos[0] or start[1] != pos[1]):
+                        heuristica += 0
+                    elif distEuclide > 2:
+                        heuristica += distEuclide*10
+
+                    logging.info(f"heuristica king : {heuristica}")
+                    
+
+                elif target_piece.name == 'R':
+                    distEuclideKing = abs(Ourpos[0] - pos[0]) + abs(Ourpos[1] - pos[1])
+                    distEuclideRook = abs(start[0] - pos[0]) + abs(start[1] - pos[1])
+
+
+                    ix = start[0]
+                    iy = start[1]
+                    while (ix < 7):
+                        ix = ix + 1
+                        distEuclideRook = abs(ix - pos[0]) + abs(iy  - pos[1])
+                        if ix == pos[0] and distEuclideRook >= 2:
+                            heuristica += 7
+                            break
+
+                    ix = start[0]
+                    iy = start[1]
+                    while (ix > 0):
+                        ix = ix - 1
+                        distEuclideRook = abs(ix - pos[0]) + abs(iy  - pos[1])
+                        if ix == pos[0] and distEuclideRook >= 2: 
+                            heuristica += 7
+                            break
+
+                    ix = start[0]
+                    iy = start[1]
+                    while (iy < 7):
+                        iy = iy + 1
+                        distEuclideRook = abs(ix - pos[0]) + abs(iy  - pos[1])
+                        if iy == pos[1] and distEuclideRook >= 2:
+                            heuristica += 7
+                            break
+
+                    ix = start[0]
+                    iy = start[1]
+                    while (iy > 0):
+                        iy = iy - 1
+                        distEuclideRook = abs(ix - pos[0]) + abs(iy  - pos[1])
+                        if iy == pos[1] and distEuclideRook >= 2:
+                            heuristica += 7
+                            break
+
+                    if distEuclideKing == 3 and (start[0] != pos[0] or start[1] != pos[1]):
+                        heuristica += 20
+                        
+
+                else:
+                    heuristica += 0
+
+
+                if self.whitePlayer == self.whiteTurn:
+                    weight += heuristica
+                else:
+                    weight -= heuristica
+
+                logging.info(f"heuristica rook : {heuristica}")
 
 
             # move piece
@@ -337,19 +416,21 @@ class Chess():
                         self.boardSim.currentStateB[m][0] = to[0] 
                         self.boardSim.currentStateB[m][1] = to[1]
 
+        
 
         
 
         # logging.warning(weight)
-        logging.debug("befeore copy End: ")
-        logging.debug(self.boardSim.currentStateW)
-        logging.debug(self.boardSim.currentStateB)
         self.boardSim.currentStateW = copy.deepcopy(self.boardSim.currentStateW)
         self.boardSim.currentStateB = copy.deepcopy(self.boardSim.currentStateB)
         logging.debug("End: ")
         logging.debug(self.boardSim.currentStateW)
         logging.debug(self.boardSim.currentStateB)
         return weight
+
+
+
+
 
     def move(self, start, to):
         """
@@ -367,8 +448,6 @@ class Chess():
         """
 
         if self.board.board[start[0]][start[1]] == None:
-            #print("There is no piece to move at the start place")
-            logging.critical("There is no piece to move at the start place")
             return
 
 
@@ -377,11 +456,6 @@ class Chess():
 
         
 
-        # to ensure alternate moves
-        # if self.turn != target_piece.color:
-        #    print("That's not your piece to move")
-        #    return
-
         
         target_piece = self.board.board[start[0]][start[1]]
         end_piece = self.board.board[to[0]][to[1]]
@@ -389,7 +463,6 @@ class Chess():
 
         # Checks if a player's own piece is at the `to` coordinate
         if is_end_piece and self.board.board[start[0]][start[1]].color == end_piece.color:
-            #print("There's a piece in the path.")
             return
 
         if target_piece.is_valid_move(self.board, start, to):
@@ -397,7 +470,6 @@ class Chess():
             # Special check for if the move is castling
             # Board reconfiguration is handled in Piece
             if target_piece.name == 'K' and abs(start[1] - to[1]) == 2:
-
                 print("castled")
 
                 if self.turn and self.black_ghost_piece:
@@ -424,34 +496,20 @@ class Chess():
                 pieceToDelete = [to[0], to[1], self.board.board[to[0]][to[1]].pieceNum]
 
                 if not White:
-                    logging.debug("self.boardSim.currentStateW")
-                    logging.debug(self.board.currentStateW)
                     if pieceToDelete in self.board.currentStateW:
                         self.board.currentStateW.remove(pieceToDelete)
-                        logging.debug("white after remove self.boardSim.currentStateW")
-                        logging.debug(self.board.currentStateW)
                         self.board.currentStateW = copy.deepcopy(self.board.currentStateW)
-                    else:
-                        logging.critical("White: doesn't have a piece to delete")
-                        logging.debug(self.board.currentStateW)
                 else:
-                    logging.debug("self.boardSim.currentStateB")
-                    logging.debug(self.board.currentStateB)
                     if pieceToDelete in self.board.currentStateB:
-                        logging.debug(self.board.currentStateB)
                         self.board.currentStateB.remove(pieceToDelete)
-                        logging.debug("blakc after remove self.boardSim.currentStateW")
-                        logging.debug(self.board.currentStateB)
                         self.board.currentStateB = copy.deepcopy(self.board.currentStateB)
-                    else:
-                        logging.critical("black: doesn't have a piece to delete")
-                        logging.debug(self.board.currentStateB)
 
 
 
             self.board.board[to[0]][to[1]] = target_piece
             self.board.board[start[0]][start[1]] = None
-            #print(str(target_piece) + " moved.")
+
+
 
             if self.turn and self.black_ghost_piece:
                 self.board.board[self.black_ghost_piece[0]][self.black_ghost_piece[1]] = None
@@ -461,54 +519,29 @@ class Chess():
             # # alternate player
             # self.turn = not self.turn
 
-            # # AI state change - identify change to make in state
-            # for m in range(len(self.board.currentStateW)):
 
-            #    # print("piece to move",self.board.currentStateW[m])
-            #     aa = self.board.currentStateW[m]
-            #     # only the one to move and only for whites so far
-            #     if self.board.listNames[int(aa[2]-1)] == str(target_piece) and target_piece.color:
-            #         print("->piece initial state ",self.board.currentStateW[m])
-            #         self.board.currentStateW[m][0] = to[0]
-            #         self.board.currentStateW[m][1] = to[1]
-            #         print("->piece to state ", self.board.currentStateW[m])
             
             if White:
                 # AI state change - identify change to make in state
                 for m in range(len(self.board.currentStateW)):
                     whitePiece = self.board.currentStateW[m]
                     if whitePiece[0] == start[0] and whitePiece[1] == start[1] and whitePiece[2] == target_piece.pieceNum:
-                    # only the one to move and only for whites so far
-                    # if self.boardSim.listNames[int(aa[2]-1)] == str(target_piece) and target_piece.color == True:
                         self.board.currentStateW[m][0] = to[0]
                         self.board.currentStateW[m][1] = to[1]
             else:
                 # AI state change - identify change to make in state
                 for m in range(len(self.board.currentStateB)):
-                    #aa = self.boardSim.currentStateB[m]
                     blackPiece = self.board.currentStateB[m]
                     if blackPiece[0] == start[0] and blackPiece[1] == start[1] and blackPiece[2] == target_piece.pieceNum:
-                    # only the one to move and only for black so far
-                    # if self.boardSim.listNames[int(aa[2]-1)] == str(target_piece) and target_piece.color == False:
                         self.board.currentStateB[m][0] = to[0] 
                         self.board.currentStateB[m][1] = to[1]
 
-        logging.debug("befeore copy End: ")
-        logging.debug(self.board.currentStateW)
-        logging.debug(self.board.currentStateB)
+
         self.board.currentStateW = copy.deepcopy(self.board.currentStateW)
         self.board.currentStateB = copy.deepcopy(self.board.currentStateB)
-        logging.debug("End: ")
-        logging.debug(self.board.currentStateW)
-        logging.debug(self.board.currentStateB)
-#                   print("Next States: ",self.board.getListNextStatesW(self.board.currentStateW[m]))
 
 
-    def getListNextStatesW(self):
-        """
-        Gets the list of next possible states given the currentStateW
 
-        """
 
 
 def translate(s):
@@ -645,13 +678,21 @@ if __name__ == "__main__":
     # TA[0][6] = 9   # black knight
     # TA[0][7] = 8   # black rook
 
+    # # white pieces
+    # TA[7][5] = 6        # white king
+    # TA[7][0] = 2        # white rook
+
+    # # black pieces
+    # TA[0][5] = 12       # black king
+    # TA[0][0] = 8        # black rook
+
     # white pieces
-    TA[7][5] = 6        # white king
-    TA[7][0] = 2        # white rook
+    TA[5][5] = 6        # white king
+    TA[6][0] = 2        # white rook
 
     # black pieces
-    TA[0][5] = 12       # black king
-    TA[0][0] = 8        # black rook
+    TA[3][4] = 12       # black king
+
 
     # initialize board
     chess = Chess(TA)
@@ -670,8 +711,8 @@ if __name__ == "__main__":
     BlackPlayerCurrentState = BlackPlayerAichess.chess.board.currentStateB.copy()
 
 
-    # WhitePlayerMinimax = copy.deepcopy(WhitePlayerAichess)
-    # BlackPlayerMinimax = copy.deepcopy(BlackPlayerAichess)
+    WhitePlayerMinimax = copy.deepcopy(WhitePlayerAichess)
+    BlackPlayerMinimax = copy.deepcopy(BlackPlayerAichess)
 
     # WhitePlayerNextState = WhitePlayerMinimax.Minimax(WhitePlayerCurrentState, 4)
     # logging.critical("minimax WHITE: ")
@@ -694,11 +735,7 @@ if __name__ == "__main__":
     #     WhitePlayerMinimax.chess.boardSim = chess.board
     #     WhitePlayerMinimax.currentStateW = chess.board.currentStateW
     #     WhitePlayerMinimax.currentStateB = chess.board.currentStateB
-    #     WhitePlayerNextState = WhitePlayerMinimax.Minimax(WhitePlayerCurrentState, 2)
-
-    #     logging.critical("minimax WHITE: ")
-    #     logging.critical(WhitePlayerCurrentState)
-    #     logging.critical(WhitePlayerNextState)
+    #     WhitePlayerNextState = WhitePlayerMinimax.Minimax(2)
     #     print(WhitePlayerCurrentState)
     #     print(WhitePlayerNextState)
 
@@ -732,10 +769,7 @@ if __name__ == "__main__":
     #     BlackPlayerMinimax.chess.boardSim = chess.board
     #     BlackPlayerMinimax.currentStateW = chess.board.currentStateW
     #     BlackPlayerMinimax.currentStateB = chess.board.currentStateB
-    #     BlackPlayerNextState = BlackPlayerMinimax.Minimax(BlackPlayerCurrentState, 2)
-    #     logging.critical("minimax BLACK: ")
-    #     logging.critical(BlackPlayerCurrentState)
-    #     logging.critical(BlackPlayerNextState)
+    #     BlackPlayerNextState = BlackPlayerMinimax.Minimax(2)
     #     print(BlackPlayerCurrentState)
     #     print(BlackPlayerNextState)
 
@@ -746,19 +780,19 @@ if __name__ == "__main__":
     #         break
         
         
-    #     # chessTable.put(chess.board)
-    #     # if chessTable.qsize() >= 12:
-    #     #     chesslist = chessTable.queue
+        # chessTable.put(chess.board)
+        # if chessTable.qsize() >= 12:
+        #     chesslist = chessTable.queue
             
-    #     #     if ( (chesslist[0] == chesslist[4] and chesslist[4] == chesslist[8]) and 
-    #     #          (chesslist[1] == chesslist[5] and chesslist[5] == chesslist[9]) and 
-    #     #          (chesslist[2] == chesslist[6] and chesslist[6] == chesslist[10]) and 
-    #     #          (chesslist[3] == chesslist[7] and chesslist[7] == chesslist[11]) 
-    #     #         ):
+        #     if ( (chesslist[0] == chesslist[4] and chesslist[4] == chesslist[8]) and 
+        #          (chesslist[1] == chesslist[5] and chesslist[5] == chesslist[9]) and 
+        #          (chesslist[2] == chesslist[6] and chesslist[6] == chesslist[10]) and 
+        #          (chesslist[3] == chesslist[7] and chesslist[7] == chesslist[11]) 
+        #         ):
 
-    #     #         print("black empate")
-    #     #         break
-    #     #     chessTable.get()
+        #         print("black empate")
+        #         break
+        #     chessTable.get()
 
 
 
@@ -784,64 +818,7 @@ if __name__ == "__main__":
     # chessTable = Queue(12)    
     # chessTable.put(chess.board)
 
-    # while not GameOver(chess.board.board):
-
-    #     # ----------------White Player -------------------------------- #
-    #     print("White player minimax: ")
-    #     WhitePlayerCurrentState = chess.board.currentStateW
-    #     WhitePlayerMinimax.chess.boardSim = chess.board
-    #     WhitePlayerMinimax.currentStateW = chess.board.currentStateW
-    #     WhitePlayerMinimax.currentStateB = chess.board.currentStateB
-    #     WhitePlayerNextState = WhitePlayerMinimax.AlfaBeta(WhitePlayerCurrentState, 4)
-
-    #     logging.critical("minimax WHITE: ")
-    #     logging.critical(WhitePlayerCurrentState)
-    #     logging.critical(WhitePlayerNextState)
-    #     print(WhitePlayerCurrentState)
-    #     print(WhitePlayerNextState)
-
-    #     movePiece(chess, WhitePlayerCurrentState, WhitePlayerNextState)
-    #     chess.board.print_board()
-
-    #     if GameOver(chess.board.board):
-    #         break
-
-
-    #     # ----------------Black Player -------------------------------- #
-    #     print("Black player minimax: ")
-    #     BlackPlayerCurrentState = chess.board.currentStateB
-    #     BlackPlayerMinimax.chess.boardSim = chess.board
-    #     BlackPlayerMinimax.currentStateW = chess.board.currentStateW
-    #     BlackPlayerMinimax.currentStateB = chess.board.currentStateB
-    #     BlackPlayerNextState = BlackPlayerMinimax.AlfaBeta(BlackPlayerCurrentState, 4)
-    #     logging.critical("minimax BLACK: ")
-    #     logging.critical(BlackPlayerCurrentState)
-    #     logging.critical(BlackPlayerNextState)
-    #     print(BlackPlayerCurrentState)
-    #     print(BlackPlayerNextState)
-
-    #     movePiece(chess, BlackPlayerCurrentState, BlackPlayerNextState)
-    #     chess.board.print_board()
-
-    #     if GameOver(chess.board.board):
-    #         break
-
-
-    # WhitePlayerMinimax = copy.deepcopy(WhitePlayerAichess)
-    # BlackPlayerMinimax = copy.deepcopy(BlackPlayerAichess)
-
-    # # WhitePlayerNextState = WhitePlayerMinimax.Expectimax(WhitePlayerCurrentState, 3)
-    # # logging.critical("minimax WHITE: ")
-    # # logging.critical(WhitePlayerCurrentState)
-    # # logging.critical(WhitePlayerNextState)
-
-    # # BlackPlayerNextState = BlackPlayerMinimax.Expectimax(BlackPlayerCurrentState, 2)
-    # # logging.critical("minimax BLACK: ")
-    # # logging.critical(BlackPlayerCurrentState)
-    # # logging.critical(BlackPlayerNextState)
-
-    # # chessTable = Queue(12)    
-    # # chessTable.put(chess.board)
+    depth = 2
 
     while not GameOver(chess.board.board):
 
@@ -851,7 +828,7 @@ if __name__ == "__main__":
         WhitePlayerMinimax.chess.boardSim = chess.board
         WhitePlayerMinimax.currentStateW = chess.board.currentStateW
         WhitePlayerMinimax.currentStateB = chess.board.currentStateB
-        WhitePlayerNextState = WhitePlayerMinimax.Expectimax(WhitePlayerCurrentState, 3)
+        WhitePlayerNextState = WhitePlayerMinimax.AlfaBeta(WhitePlayerCurrentState, depth)
 
         logging.critical("minimax WHITE: ")
         logging.critical(WhitePlayerCurrentState)
@@ -872,7 +849,7 @@ if __name__ == "__main__":
         BlackPlayerMinimax.chess.boardSim = chess.board
         BlackPlayerMinimax.currentStateW = chess.board.currentStateW
         BlackPlayerMinimax.currentStateB = chess.board.currentStateB
-        BlackPlayerNextState = BlackPlayerMinimax.Expectimax(BlackPlayerCurrentState, 3)
+        BlackPlayerNextState = BlackPlayerMinimax.AlfaBeta(BlackPlayerCurrentState, depth)
         logging.critical("minimax BLACK: ")
         logging.critical(BlackPlayerCurrentState)
         logging.critical(BlackPlayerNextState)
@@ -884,6 +861,65 @@ if __name__ == "__main__":
 
         if GameOver(chess.board.board):
             break
+
+
+    # WhitePlayerMinimax = copy.deepcopy(WhitePlayerAichess)
+    # BlackPlayerMinimax = copy.deepcopy(BlackPlayerAichess)
+
+    # # WhitePlayerNextState = WhitePlayerMinimax.Expectimax(WhitePlayerCurrentState, 3)
+    # # logging.critical("minimax WHITE: ")
+    # # logging.critical(WhitePlayerCurrentState)
+    # # logging.critical(WhitePlayerNextState)
+
+    # # BlackPlayerNextState = BlackPlayerMinimax.Expectimax(BlackPlayerCurrentState, 2)
+    # # logging.critical("minimax BLACK: ")
+    # # logging.critical(BlackPlayerCurrentState)
+    # # logging.critical(BlackPlayerNextState)
+
+    # # chessTable = Queue(12)    
+    # # chessTable.put(chess.board)
+
+    # while not GameOver(chess.board.board):
+
+    #     # ----------------White Player -------------------------------- #
+    #     print("White player minimax: ")
+    #     WhitePlayerCurrentState = chess.board.currentStateW
+    #     WhitePlayerMinimax.chess.boardSim = chess.board
+    #     WhitePlayerMinimax.currentStateW = chess.board.currentStateW
+    #     WhitePlayerMinimax.currentStateB = chess.board.currentStateB
+    #     WhitePlayerNextState = WhitePlayerMinimax.Expectimax(WhitePlayerCurrentState, 3)
+
+    #     logging.critical("minimax WHITE: ")
+    #     logging.critical(WhitePlayerCurrentState)
+    #     logging.critical(WhitePlayerNextState)
+    #     print(WhitePlayerCurrentState)
+    #     print(WhitePlayerNextState)
+
+    #     movePiece(chess, WhitePlayerCurrentState, WhitePlayerNextState)
+    #     chess.board.print_board()
+
+    #     if GameOver(chess.board.board):
+    #         break
+
+
+    #     # ----------------Black Player -------------------------------- #
+    #     print("Black player minimax: ")
+    #     BlackPlayerCurrentState = chess.board.currentStateB
+    #     BlackPlayerMinimax.chess.boardSim = chess.board
+    #     BlackPlayerMinimax.currentStateW = chess.board.currentStateW
+    #     BlackPlayerMinimax.currentStateB = chess.board.currentStateB
+    #     BlackPlayerNextState = BlackPlayerMinimax.Expectimax(BlackPlayerCurrentState, 3)
+    #     logging.critical("minimax BLACK: ")
+    #     logging.critical(BlackPlayerCurrentState)
+    #     logging.critical(BlackPlayerNextState)
+    #     print(BlackPlayerCurrentState)
+    #     print(BlackPlayerNextState)
+
+    #     movePiece(chess, BlackPlayerCurrentState, BlackPlayerNextState)
+    #     chess.board.print_board()
+
+    #     if GameOver(chess.board.board):
+    #         break
         
 
 
