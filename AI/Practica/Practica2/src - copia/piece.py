@@ -1,5 +1,17 @@
+from lib import initLogging, logging
+
 blocked_path = "There's a piece in the path."
 incorrect_path = "This piece does not move in this pattern."
+
+
+POINT_None   = 0
+POINT_Pawn   = 1000
+POINT_Knight = 3000
+POINT_Bishop = 3000
+POINT_Rook   = 5000
+POINT_Queen  = 9000
+POINT_King   = 100000
+
 
 
 def check_knight(color, board, pos):
@@ -145,7 +157,7 @@ def check_updown_castle(color, board, start, to):
     return True
 
 
-def check_updown(board, start, to):
+def  check_updown(board, start, to):
     """
     Checks if there are no pieces along the vertical or horizontal path
     from `start` (non-inclusive) to `to` (non-inclusive). 
@@ -180,6 +192,12 @@ def check_updown(board, start, to):
         return True
 
 
+
+
+
+
+
+
 class Piece():
     """
     A class to represent a piece in chess
@@ -200,32 +218,53 @@ class Piece():
     color : bool
         True if piece is white
 
-    Methods:
-    --------
-    is_valid_move(board, start, to) -> bool
-        Returns True if moving the piece at `start` to `to` is a legal
-        move on board `board`
-        Precondition: [start] and [to] are valid coordinates on the board.board
-    is_white() -> bool
-        Return True if piece is white
+    point : int
+        point of piece
 
+    state : bool
+        True  --> piece is live
+        Flase --> piece is dead
+
+    pieceNum : int
+        number of piece 
     """
 
     def __init__(self, color):
         self.name = ""
         self.color = color
+        self.point = 0
+        self.state = True
+        self.pieceNum = -1
 
     def is_valid_move(self, board, start, to):
+        '''
+            is_valid_move(board, start, to) -> bool
+            Returns True if moving the piece at `start` to `to` is a legal
+            move on board `board`
+            Precondition: [start] and [to] are valid coordinates on the board.board
+        '''
         return False
 
     def is_white(self):
+        '''
+        is_white() -> bool
+            Return True if piece is white
+
+        TRUE  --> white
+        FALSE --> black
+        '''
         return self.color
+
 
     def __str__(self):
         if self.color:
             return self.name
         else:
             return '\033[94m' + self.name + '\033[0m'
+
+
+
+
 
 
 class Rook(Piece):
@@ -238,6 +277,12 @@ class Rook(Piece):
         super().__init__(color)
         self.name = "R"
         self.first_move = first_move
+        self.point = POINT_Rook
+
+        if color:
+            self.pieceNum = 2
+        else:
+            self.pieceNum = 8
 
     def is_valid_move(self, board, start, to):
         if start[0] == to[0] or start[1] == to[1]:
@@ -246,11 +291,19 @@ class Rook(Piece):
         return False
 
 
+
+
 class Knight(Piece):
 
     def __init__(self, color):
         super().__init__(color)
         self.name = "N"
+        self.point = POINT_Knight
+
+        if color:
+            self.pieceNum = 3
+        else:
+            self.pieceNum = 9
 
     def is_valid_move(self, board, start, to):
         if abs(start[0] - to[0]) == 2 and abs(start[1] - to[1]) == 1:
@@ -261,11 +314,20 @@ class Knight(Piece):
         return False
 
 
+
+
 class Bishop(Piece):
 
     def __init__(self, color):
         super().__init__(color)
         self.name = "B"
+        self.point = POINT_Bishop
+
+        if color:
+            self.pieceNum = 4
+        else:
+            self.pieceNum = 10
+
 
     def is_valid_move(self, board, start, to):
         return check_diag(board, start, to)
@@ -276,6 +338,12 @@ class Queen(Piece):
     def __init__(self, color):
         super().__init__(color)
         self.name = "Q"
+        self.point = POINT_Queen
+
+        if color:
+            self.pieceNum = 5
+        else:
+            self.pieceNum = 11
 
     def is_valid_move(self, board, start, to):
         # diagonal
@@ -299,6 +367,13 @@ class King(Piece):
         super().__init__(color)
         self.name = "K"
         self.first_move = first_move
+        self.point = POINT_King
+
+        if color:
+            self.pieceNum = 6
+        else:
+            self.pieceNum = 12
+
 
     def can_castle(self, board, start, to, right):
         """
@@ -440,6 +515,9 @@ class King(Piece):
 
             return True
 
+
+
+
     def is_valid_move(self, board, start, to):
         if self.first_move and abs(start[1] - to[1]) == 2 and start[0] - to[0] == 0:
             return self.can_castle(board, start, to, to[1] - start[1] > 0)
@@ -453,14 +531,29 @@ class King(Piece):
         return False
 
 
+
+    def isCheckMateCaseForRook(self, board):
+
+        if self.color:  # white king
+            pass
+
+        else:           # black king
+            pass
+
+
+        return True
+
+
 class GhostPawn(Piece):
 
     def __init__(self, color):
         super().__init__(color)
         self.name = "GP"
+        self.point = POINT_Pawn
 
     def is_valid_move(self, board, start, to):
         return False
+
 
 
 class Pawn(Piece):
@@ -469,6 +562,13 @@ class Pawn(Piece):
         super().__init__(color)
         self.name = "P"
         self.first_move = True
+        self.point = POINT_Pawn
+
+        if color:
+            self.pieceNum = 1
+        else:
+            self.pieceNum = 7
+
 
     def is_valid_move(self, board, start, to):
         if self.color:
