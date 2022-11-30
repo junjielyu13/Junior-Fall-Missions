@@ -24,3 +24,12 @@ compile:
 * analisi with valgrind practica4
   gcc -g analisi.c -o analisi -lpthread
   valgrind --leak-check=full -s ./analisi aeroports.csv fitxer_petit.csv 2> errors.txt
+
+
+  gcc programa.c -o programa -lpthread
+
+run:
+
+  ./analisi aeroports.csv fitxer_petit.csv
+  ./analisi aeroports.csv 2007.csv
+  ./analisi aeroports.csv 2008.csv
