@@ -3,6 +3,7 @@ compile:
 
 * analisi normal 
   gcc analisi.c -o analisi
+  gcc analisi_original.c -o analisi_original
 
 * analisi with pthread 
   gcc analisi.c -o analisi -lpthread
@@ -30,6 +31,29 @@ compile:
 
 run:
 
-  ./analisi aeroports.csv fitxer_petit.csv
+  ./analisi aeroports.csv fitxer_petit.csv > test_petit.txt
   ./analisi aeroports.csv 2007.csv
   ./analisi aeroports.csv 2008.csv
+
+
+  ./analisi aeroports.csv 2007.csv > test_2007.txt;
+  ./analisi_original aeroports.csv 2007.csv > original_2007.txt;
+  diff test_2007.txt original_2007.txt
+
+  ./analisi aeroports.csv 2008.csv > test_2008.txt
+  ./analisi_original aeroports.csv 2008.csv > original_2008.txt
+  diff test_2008.txt original_2008.txt
+
+
+
+make; \
+./analisi aeroports.csv fitxer_petit.csv > test_petit.txt; \
+./analisi_original aeroports.csv fitxer_petit.csv > original_petit.txt; \
+diff test_petit.txt original_petit.txt; \
+./analisi aeroports.csv 2007.csv > test_2007.txt; \
+./analisi_original aeroports.csv 2007.csv > original_2007.txt; \
+diff test_2007.txt original_2007.txt; \
+./analisi aeroports.csv 2008.csv > test_2008.txt; \
+./analisi_original aeroports.csv 2008.csv > original_2008.txt; \
+diff test_2008.txt original_2008.txt
+
