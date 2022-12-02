@@ -2,14 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
-#include <pthread.h>
-#include <unistd.h>
-
-#define NUM_FILS 2
-#define N_BLOCK 1000
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #define MAXCHAR 500
+
 #define LEN_CODE_AIRPORT 3
 #define STR_CODE_AIRPORT (LEN_CODE_AIRPORT+1) // Incluimos el caracter de final de palabra '\0'
 #define NUM_AIRPORTS 303
@@ -26,13 +21,11 @@ void **malloc_matrix(int nrow, int ncol, size_t size)
 {
   int i;
 
-  void **ptr = NULL;
+  void **ptr;
 
-  ptr = (void **) malloc(sizeof(void *) * nrow);
-  for(i = 0; i < nrow; i++){
-    ptr[i] = NULL;
-    ptr[i] =  (void *) calloc(1, size * ncol);
-  }
+  ptr = malloc(sizeof(void *) * nrow);
+  for(i = 0; i < nrow; i++)
+    ptr[i] = malloc(size * ncol);
 
   return ptr;
 }
@@ -47,11 +40,8 @@ void free_matrix(void **matrix, int nrow)
 {
   int i;
 
-  for(i = 0; i < nrow; i++){
+  for(i = 0; i < nrow; i++)
     free(matrix[i]);
-  }
-
-  free(matrix);
 }
 
 /**
@@ -107,9 +97,8 @@ int get_index_airport(char *code, char **airports)
   int i;
 
   for(i = 0; i < NUM_AIRPORTS; i++) 
-    if (strcmp(code, airports[i]) == 0){
+    if (strcmp(code, airports[i]) == 0)
       return i;
-    }
 
   return -1;
 }
@@ -258,75 +247,6 @@ int extract_fields_airport(char *origin, char *destination, char *line)
   return invalid;
 }
 
-void printids(const char *s){
-    pid_t pid;
-    pthread_t tid;
-
-    pid = getpid();
-    tid = pthread_self();
-    printf("%s pid %u tid %u (0x%x)\n", s, (unsigned int)pid, (unsigned int)tid, (unsigned int)tid);
-}
-
-struct parametres{
-    FILE *fp;
-    int **num_flights;
-    char **airports;
-};
-
-void* thread_read_airports_data(void *arg){
-    struct parametres *par = (struct parametres *)arg;
-    FILE *fp = par->fp;
-    int **num_flights = par->num_flights;
-    char **airports = par->airports;
-
-    char origin[STR_CODE_AIRPORT], destination[STR_CODE_AIRPORT];
-    int invalid, index_origin, index_destination;
-    char** line = (char **) malloc_matrix(N_BLOCK, MAXCHAR, sizeof(char));
-    int i;
-    
-
-    while (1){
-
-      //printids("nou fil: ");
-      int readblock = 0;
-      pthread_mutex_lock(&mutex);
-      while (readblock < N_BLOCK){
-        fgets(line[readblock], MAXCHAR, fp);
-        //printf("%s\n",line[readblock]);
-        readblock++;
-      }
-      pthread_mutex_unlock(&mutex);
-      readblock = N_BLOCK;
-
-      for(i = 0; i<N_BLOCK; i++){
-
-        invalid = extract_fields_airport(origin, destination, line[i]);
-
-          if (!invalid) {
-            index_origin = get_index_airport(origin, airports);
-            index_destination = get_index_airport(destination, airports);
-
-            if ((index_origin >= 0) && (index_destination >= 0)){
-              pthread_mutex_lock(&mutex);
-              num_flights[index_origin][index_destination]++;
-              pthread_mutex_unlock(&mutex);
-            }
-          }
-        
-        readblock--;
-      }
-
-      if(feof(fp)){
-        break;
-      }
-
-    }
-
-    free_matrix((void **) line, N_BLOCK);
-    
-    return ((void *)0);
-}
-
 /**
  * Dado un fichero CSV que contiene informacion entre multiples aeropuertos,
  * esta funcion lee cada linea del fichero y actualiza la matriz num_flights
@@ -336,9 +256,8 @@ void* thread_read_airports_data(void *arg){
 void read_airports_data(int **num_flights, char **airports, char *fname) 
 {
   char line[MAXCHAR];
-  int i;
-  pthread_t ntid[NUM_FILS];
-  struct parametres par[NUM_FILS];
+  char origin[STR_CODE_AIRPORT], destination[STR_CODE_AIRPORT];
+  int invalid, index_origin, index_destination;
 
   FILE *fp;
 
@@ -351,18 +270,18 @@ void read_airports_data(int **num_flights, char **airports, char *fname)
   /* Leemos la cabecera del fichero */
   fgets(line, MAXCHAR, fp);
 
-  // thread
-  for (i = 0; i < NUM_FILS; i++){   
-    par[i].fp = fp;
-    par[i].num_flights = num_flights;
-    par[i].airports = airports;
-    pthread_create(ntid+i, NULL, thread_read_airports_data, (void *) &par[i]);
-  }
+  while (fgets(line, MAXCHAR, fp) != NULL)
+  {
+    invalid = extract_fields_airport(origin, destination, line);
 
-  for (i = 0; i < NUM_FILS; i++){
-    pthread_join(ntid[i], NULL);
-  }
+    if (!invalid) {
+      index_origin = get_index_airport(origin, airports);
+      index_destination = get_index_airport(destination, airports);
 
+      if ((index_origin >= 0) && (index_destination >= 0))
+        num_flights[index_origin][index_destination]++;
+    }
+  }
 
   fclose(fp);
 }
