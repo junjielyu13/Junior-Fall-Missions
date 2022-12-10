@@ -28,7 +28,7 @@ void loop(){
     Serial.println("no networks found");
   else{
     for(int i = 0; i<n; i++){
-      if (WiFi.SSID(i) == "MIWIFI_5G_bPkR"){
+      if (WiFi.SSID(i) == "MIWIFI_2G_bPkR"){
         Serial.print(WiFi.SSID(i));
         Serial.print("(");
         Serial.print(WiFi.RSSI(i));
