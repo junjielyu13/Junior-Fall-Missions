@@ -5,13 +5,17 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define NUM_FILS 2
+#define NUM_FILS_PRODUCTOR 1
+#define NUM_FILS_CONSUMIDOR 2
 #define N_BLOCK 1000
+
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t prod = PTHREAD_COND_INITIALIZER;
+pthread_cond_t cons = PTHREAD_COND_INITIALIZER;
 
 #define MAXCHAR 500
 #define LEN_CODE_AIRPORT 3
-#define STR_CODE_AIRPORT (LEN_CODE_AIRPORT+1) // Incluimos el caracter de final de palabra '\0'
+#define STR_CODE_AIRPORT (LEN_CODE_AIRPORT + 1) // Incluimos el caracter de final de palabra '\0'
 #define NUM_AIRPORTS 303
 
 #define COL_ORIGIN_AIRPORT 17
@@ -28,10 +32,11 @@ void **malloc_matrix(int nrow, int ncol, size_t size)
 
   void **ptr = NULL;
 
-  ptr = (void **) malloc(sizeof(void *) * nrow);
-  for(i = 0; i < nrow; i++){
+  ptr = (void **)malloc(sizeof(void *) * nrow);
+  for (i = 0; i < nrow; i++)
+  {
     ptr[i] = NULL;
-    ptr[i] =  (void *) calloc(1, size * ncol);
+    ptr[i] = (void *)calloc(1, size * ncol);
   }
 
   return ptr;
@@ -39,7 +44,7 @@ void **malloc_matrix(int nrow, int ncol, size_t size)
 
 /**
  * Libera una matriz de tamaño con nrow filas. Utilizar
- * la funcion malloc_matrix para reservar la memoria 
+ * la funcion malloc_matrix para reservar la memoria
  * asociada.
  */
 
@@ -47,7 +52,8 @@ void free_matrix(void **matrix, int nrow)
 {
   int i;
 
-  for(i = 0; i < nrow; i++){
+  for (i = 0; i < nrow; i++)
+  {
     free(matrix[i]);
   }
 
@@ -63,7 +69,7 @@ void free_matrix(void **matrix, int nrow)
  * matriz cuya memoria ha sido previamente reservada.
  */
 
-void read_airports(char **airports, char *fname) 
+void read_airports(char **airports, char *fname)
 {
   int i;
   char line[MAXCHAR];
@@ -76,7 +82,8 @@ void read_airports(char **airports, char *fname)
   char eow = '\0';
 
   fp = fopen(fname, "r");
-  if (!fp) {
+  if (!fp)
+  {
     printf("ERROR: could not open file '%s'\n", fname);
     exit(1);
   }
@@ -85,7 +92,7 @@ void read_airports(char **airports, char *fname)
   while (i < NUM_AIRPORTS)
   {
     fgets(line, 100, fp);
-    line[3] = eow; 
+    line[3] = eow;
 
     /* Copiamos los datos al vector */
     strcpy(airports[i], line);
@@ -106,14 +113,14 @@ int get_index_airport(char *code, char **airports)
 {
   int i;
 
-  for(i = 0; i < NUM_AIRPORTS; i++) 
-    if (strcmp(code, airports[i]) == 0){
+  for (i = 0; i < NUM_AIRPORTS; i++)
+    if (strcmp(code, airports[i]) == 0)
+    {
       return i;
     }
 
   return -1;
 }
-
 
 /**
  * Dada la matriz num_flights, se imprimen por pantalla el
@@ -124,11 +131,11 @@ void print_num_flights_summary(int **num_flights, char **airports)
 {
   int i, j, num;
 
-  for(i = 0; i < NUM_AIRPORTS; i++) 
+  for (i = 0; i < NUM_AIRPORTS; i++)
   {
     num = 0;
 
-    for(j = 0; j < NUM_AIRPORTS; j++)
+    for (j = 0; j < NUM_AIRPORTS; j++)
     {
       if (num_flights[i][j] > 0)
         num++;
@@ -144,7 +151,7 @@ void print_num_flights_summary(int **num_flights, char **airports)
  * leida de fichero, la funcion extra el origen y destino de los vuelos.
  */
 
-int extract_fields_airport(char *origin, char *destination, char *line) 
+int extract_fields_airport(char *origin, char *destination, char *line)
 {
   /*Recorre la linea por caracteres*/
   char caracter;
@@ -159,7 +166,7 @@ int extract_fields_airport(char *origin, char *destination, char *line)
    */
   int start, end, len;
   /* invalid nos permite saber si todos los campos son correctos
-   * 1 hay error, 0 no hay error 
+   * 1 hay error, 0 no hay error
    */
   int invalid = 0;
   /* found se utiliza para saber si hemos encontrado los dos campos:
@@ -184,10 +191,12 @@ int extract_fields_airport(char *origin, char *destination, char *line)
   /*
    * Empezamos a contar comas
    */
-  do {
+  do
+  {
     caracter = line[i++];
-    if (caracter == ',') {
-      coma_count ++;
+    if (caracter == ',')
+    {
+      coma_count++;
       /*
        * Cogemos el valor de end
        */
@@ -195,16 +204,19 @@ int extract_fields_airport(char *origin, char *destination, char *line)
       /*
        * Si es uno de los campos que queremos procedemos a copiar el substring
        */
-      if (coma_count ==  COL_ORIGIN_AIRPORT || coma_count == COL_DESTINATION_AIRPORT) {
+      if (coma_count == COL_ORIGIN_AIRPORT || coma_count == COL_DESTINATION_AIRPORT)
+      {
         /*
-         * Calculamos la longitud, si es mayor que 1 es que tenemos 
+         * Calculamos la longitud, si es mayor que 1 es que tenemos
          * algo que copiar
          */
         len = end - start;
 
-        if (len > 1) {
+        if (len > 1)
+        {
 
-          if (len > STR_CODE_AIRPORT) {
+          if (len > STR_CODE_AIRPORT)
+          {
             printf("ERROR len code airport\n");
             exit(1);
           }
@@ -212,37 +224,41 @@ int extract_fields_airport(char *origin, char *destination, char *line)
           /*
            * Copiamos el substring
            */
-          for(iterator = start; iterator < end-1; iterator ++){
-            word[iterator-start] = line[iterator];
+          for (iterator = start; iterator < end - 1; iterator++)
+          {
+            word[iterator - start] = line[iterator];
           }
           /*
            * Introducimos el caracter de fin de palabra
            */
-          word[iterator-start] = eow;
+          word[iterator - start] = eow;
           /*
-           * Comprobamos que el campo no sea NA (Not Available) 
+           * Comprobamos que el campo no sea NA (Not Available)
            */
           if (strcmp("NA", word) == 0)
             invalid = 1;
-          else {
-            switch (coma_count) {
-              case COL_ORIGIN_AIRPORT:
-                strcpy(origin, word);
-                found++;
-                break;
-              case COL_DESTINATION_AIRPORT:
-                strcpy(destination, word);
-                found++;
-                break;
-              default:
-                printf("ERROR in coma_count\n");
-                exit(1);
+          else
+          {
+            switch (coma_count)
+            {
+            case COL_ORIGIN_AIRPORT:
+              strcpy(origin, word);
+              found++;
+              break;
+            case COL_DESTINATION_AIRPORT:
+              strcpy(destination, word);
+              found++;
+              break;
+            default:
+              printf("ERROR in coma_count\n");
+              exit(1);
             }
           }
-
-        } else {
+        }
+        else
+        {
           /*
-           * Si el campo esta vacio invalidamos la linea entera 
+           * Si el campo esta vacio invalidamos la linea entera
            */
 
           invalid = 1;
@@ -250,7 +266,7 @@ int extract_fields_airport(char *origin, char *destination, char *line)
       }
       start = end;
     }
-  } while (caracter && invalid==0);
+  } while (caracter && invalid == 0);
 
   if (found != 2)
     invalid = 1;
@@ -258,92 +274,236 @@ int extract_fields_airport(char *origin, char *destination, char *line)
   return invalid;
 }
 
-void printids(const char *s){
-    pid_t pid;
-    pthread_t tid;
+void printids(const char *s)
+{
+  pid_t pid;
+  pthread_t tid;
 
-    pid = getpid();
-    tid = pthread_self();
-    printf("%s pid %u tid %u (0x%x)\n", s, (unsigned int)pid, (unsigned int)tid, (unsigned int)tid);
+  pid = getpid();
+  tid = pthread_self();
+  printf("%s pid %u tid %u (0x%x)\n", s, (unsigned int)pid, (unsigned int)tid, (unsigned int)tid);
 }
 
-struct parametres{
-    FILE *fp;
-    int **num_flights;
-    char **airports;
-};
+typedef struct Queue
+{
+  char **line;
+  int front;
+  int rear;
+  int size;
+} Queue;
 
-void* thread_read_airports_data(void *arg){
-    struct parametres *par = (struct parametres *)arg;
-    FILE *fp = par->fp;
-    int **num_flights = par->num_flights;
-    char **airports = par->airports;
+Queue *CreateQueue()
+{
+  Queue *queue = (Queue *)malloc(sizeof(Queue));
+  if (!queue)
+  {
+    printf("ERROR: could creat queue\n");
+    exit(1);
+  }
+  queue->line = (char **)malloc_matrix(N_BLOCK, MAXCHAR, sizeof(char));
+  queue->front = -1;
+  queue->rear = -1;
+  queue->size = 0;
+  return queue;
+}
 
-    char origin[STR_CODE_AIRPORT], destination[STR_CODE_AIRPORT];
-    int invalid, index_origin, index_destination;
-    char** line = (char **) malloc_matrix(N_BLOCK, MAXCHAR, sizeof(char));
-    int i;
-    
+void destroyQueue(Queue *queue)
+{
+  free_matrix((void **)queue->line, N_BLOCK);
+  free(queue);
+}
 
-    while (1){
+int isFull(Queue *queue)
+{
+  return (queue->size == N_BLOCK);
+}
 
-      //printids("nou fil: ");
-      int readblock = 0;
-      pthread_mutex_lock(&mutex);
-      while (readblock < N_BLOCK){
-        fgets(line[readblock], MAXCHAR, fp);
-        //printf("%s\n",line[readblock]);
-        readblock++;
-      }
-      pthread_mutex_unlock(&mutex);
-      readblock = N_BLOCK;
+int isEmpty(Queue *queue)
+{
+  return (queue->size == 0);
+}
 
-      for(i = 0; i<N_BLOCK; i++){
+int addElement(Queue *queue, char *info)
+{
+  if (isFull(queue))
+  {
+    return 0;
+  }
+  queue->rear++;
+  queue->rear %= N_BLOCK;
+  queue->size++;
+  queue->line[queue->rear] = info;
+  return 1;
+}
 
-        invalid = extract_fields_airport(origin, destination, line[i]);
+char *getElement(Queue *queue)
+{
+  if (isEmpty(queue))
+  {
+    return NULL;
+  }
+  queue->front++;
+  queue->front %= N_BLOCK;
+  queue->size--;
+  return queue->line[queue->front];
+}
 
-          if (!invalid) {
-            index_origin = get_index_airport(origin, airports);
-            index_destination = get_index_airport(destination, airports);
+typedef struct cell
+{
+  int nelems;
+  char **lines;
+} cell;
 
-            if ((index_origin >= 0) && (index_destination >= 0)){
-              pthread_mutex_lock(&mutex);
-              num_flights[index_origin][index_destination]++;
-              pthread_mutex_unlock(&mutex);
-            }
-          }
-        
-        readblock--;
-      }
+typedef struct param_prod
+{
+  FILE *fp;
+  Queue *queue;
+} param_prod;
 
-      if(feof(fp)){
-        break;
-      }
+typedef struct param_cons
+{
+  int **num_flights;
+  char **airports;
+  Queue *queue;
+} param_cons;
 
+// void* thread_read_airports_data(void *arg){
+//     struct parametres *par = (struct parametres *)arg;
+//     FILE *fp = par->fp;
+//     int **num_flights = par->num_flights;
+//     char **airports = par->airports;
+
+//     char origin[STR_CODE_AIRPORT], destination[STR_CODE_AIRPORT];
+//     int invalid, index_origin, index_destination;
+//     char** line = (char **) malloc_matrix(N_BLOCK, MAXCHAR, sizeof(char));
+//     int i;
+
+//     while (1){
+
+//       //printids("nou fil: ");
+//       int readblock = 0;
+//       pthread_mutex_lock(&mutex);
+//       while (readblock < N_BLOCK){
+//         fgets(line[readblock], MAXCHAR, fp);
+//         //printf("%s\n",line[readblock]);
+//         readblock++;
+//       }
+//       pthread_mutex_unlock(&mutex);
+//       readblock = N_BLOCK;
+
+//       for(i = 0; i<N_BLOCK; i++){
+
+//         invalid = extract_fields_airport(origin, destination, line[i]);
+
+//           if (!invalid) {
+//             index_origin = get_index_airport(origin, airports);
+//             index_destination = get_index_airport(destination, airports);
+
+//             if ((index_origin >= 0) && (index_destination >= 0)){
+//               pthread_mutex_lock(&mutex);
+//               num_flights[index_origin][index_destination]++;
+//               pthread_mutex_unlock(&mutex);
+//             }
+//           }
+
+//         readblock--;
+//       }
+
+// //       if(feof(fp)){
+// //         break;
+//       }
+
+//     }
+
+//     free_matrix((void **) line, N_BLOCK);
+
+//     return ((void *)0);
+// }
+
+void *productor(void *arg){
+
+  param_prod *par = (struct param_prod *)arg;
+  FILE *fp = par->fp;
+  Queue *queue = par->queue;
+  char temp[MAXCHAR];
+
+  while (1){
+    pthread_mutex_lock(&mutex);
+
+    while (isFull(queue)){
+      pthread_cond_wait(&prod, &mutex);
+    }
+    fgets(temp, MAXCHAR, fp);
+    addElement(queue, temp);
+    pthread_cond_signal(&cons);
+    pthread_mutex_unlock(&mutex);
+
+    if (feof(fp))
+    {
+      break;
+    }
+  }
+
+  return ((void *)0);
+}
+
+void *consumidor(void *arg){
+
+  param_cons *par = (struct param_cons *)arg;
+  int **num_flights = par->num_flights;
+  char **airports = par->airports;
+  Queue *queue = par->queue;
+
+  char origin[STR_CODE_AIRPORT], destination[STR_CODE_AIRPORT];
+  int invalid, index_origin, index_destination;
+  char *temp = "";
+
+  while (!isEmpty(queue)){
+    pthread_mutex_lock(&mutex);
+    while (isEmpty(queue)){
+      pthread_cond_wait(&cons, &mutex);
     }
 
-    free_matrix((void **) line, N_BLOCK);
-    
-    return ((void *)0);
+    temp = getElement(queue);
+    invalid = extract_fields_airport(origin, destination, temp);
+
+    if (!invalid){
+      index_origin = get_index_airport(origin, airports);
+      index_destination = get_index_airport(destination, airports);
+
+      if ((index_origin >= 0) && (index_destination >= 0)){
+        num_flights[index_origin][index_destination]++;
+      }
+    }
+
+    pthread_cond_signal(&prod);
+    pthread_mutex_unlock(&mutex);
+  }
+
+  return ((void *)0);
 }
 
 /**
  * Dado un fichero CSV que contiene informacion entre multiples aeropuertos,
  * esta funcion lee cada linea del fichero y actualiza la matriz num_flights
  * para saber cuantos vuelos hay entre cada cuidad origen y destino.
- */ 
+ */
 
-void read_airports_data(int **num_flights, char **airports, char *fname) 
+void read_airports_data(int **num_flights, char **airports, char *fname)
 {
   char line[MAXCHAR];
   int i;
-  pthread_t ntid[NUM_FILS];
-  struct parametres par[NUM_FILS];
+
+  pthread_t ntid_prod[NUM_FILS_PRODUCTOR];
+  pthread_t ntid_cons[NUM_FILS_CONSUMIDOR];
+
+  param_prod par_prod[NUM_FILS_PRODUCTOR];
+  param_cons par_cons[NUM_FILS_CONSUMIDOR];
 
   FILE *fp;
 
   fp = fopen(fname, "r");
-  if (!fp) {
+  if (!fp){
     printf("ERROR: could not open '%s'\n", fname);
     exit(1);
   }
@@ -351,19 +511,36 @@ void read_airports_data(int **num_flights, char **airports, char *fname)
   /* Leemos la cabecera del fichero */
   fgets(line, MAXCHAR, fp);
 
-  // thread
-  for (i = 0; i < NUM_FILS; i++){   
-    par[i].fp = fp;
-    par[i].num_flights = num_flights;
-    par[i].airports = airports;
-    pthread_create(ntid+i, NULL, thread_read_airports_data, (void *) &par[i]);
+  Queue *queue = CreateQueue();
+  printf("queue: front %d, rear: %d, size %d\n", queue->front, queue->rear, queue->size);
+
+  // thread productor
+  for (i = 0; i < NUM_FILS_PRODUCTOR; i++){
+    par_prod[i].fp = fp;
+    par_prod[i].queue = queue;
+    pthread_create(ntid_prod + i, NULL, productor, (void *)&par_prod[i]);
   }
 
-  for (i = 0; i < NUM_FILS; i++){
-    pthread_join(ntid[i], NULL);
+  // thread consumidor
+  for (i = 0; i < NUM_FILS_CONSUMIDOR; i++){
+    par_cons[i].num_flights = num_flights;
+    par_cons[i].airports = airports;
+    par_cons[i].queue = queue;
+    pthread_create(ntid_cons + i, NULL, consumidor, (void *)&par_cons[i]);
+  }
+
+  for (i = 0; i < NUM_FILS_PRODUCTOR; i++)
+  {
+    pthread_join(ntid_prod[i], NULL);
+  }
+
+  for (i = 0; i < NUM_FILS_CONSUMIDOR; i++)
+  {
+    pthread_join(ntid_cons[i], NULL);
   }
 
 
+  destroyQueue(queue);
   fclose(fp);
 }
 
@@ -383,21 +560,22 @@ int main(int argc, char **argv)
   char **airports;
   int **num_flights;
 
-  if (argc != 3) {
+  if (argc != 3)
+  {
     printf("%s <airport.csv> <flights.csv>\n", argv[0]);
     exit(1);
   }
 
   struct timeval tv1, tv2;
 
-  // Tiempo cronologico 
+  // Tiempo cronologico
   gettimeofday(&tv1, NULL);
 
   // Reserva espacio para las matrices
-  airports    = (char **) malloc_matrix(NUM_AIRPORTS, STR_CODE_AIRPORT, sizeof(char));
-  num_flights = (int **) malloc_matrix(NUM_AIRPORTS, NUM_AIRPORTS, sizeof(int));
+  airports = (char **)malloc_matrix(NUM_AIRPORTS, STR_CODE_AIRPORT, sizeof(char));
+  num_flights = (int **)malloc_matrix(NUM_AIRPORTS, NUM_AIRPORTS, sizeof(int));
 
-  // Lee los codigos de los aeropuertos 
+  // Lee los codigos de los aeropuertos
   read_airports(airports, argv[1]);
 
   // Lee los datos de los vuelos
@@ -407,16 +585,16 @@ int main(int argc, char **argv)
   print_num_flights_summary(num_flights, airports);
 
   // Libera espacio
-  free_matrix((void **) airports, NUM_AIRPORTS);
-  free_matrix((void **) num_flights, NUM_AIRPORTS);
+  free_matrix((void **)airports, NUM_AIRPORTS);
+  free_matrix((void **)num_flights, NUM_AIRPORTS);
 
-  // Tiempo cronologico 
+  // Tiempo cronologico
   gettimeofday(&tv2, NULL);
 
-  // Tiempo para la creacion del arbol 
+  // Tiempo para la creacion del arbol
   printf("Tiempo para procesar el fichero: %f segundos\n",
-      (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
-      (double) (tv2.tv_sec - tv1.tv_sec));
+         (double)(tv2.tv_usec - tv1.tv_usec) / 1000000 +
+             (double)(tv2.tv_sec - tv1.tv_sec));
 
   return 0;
 }
