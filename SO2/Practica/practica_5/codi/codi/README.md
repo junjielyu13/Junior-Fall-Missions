@@ -27,6 +27,11 @@ compile:
   valgrind --leak-check=full --show-leak-kinds=all --error-limit=no -s  ./analisi aeroports.csv fitxer_petit.csv 2> errors.txt
 
 
+  gcc -g analisi.c -o analisi -lpthread; \
+  ./analisi aeroports.csv fitxer_petit.csv > test_petit.txt
+
+
+
   gcc programa.c -o programa -lpthread
 
 run:

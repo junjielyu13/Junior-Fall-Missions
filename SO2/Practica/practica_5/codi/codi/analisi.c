@@ -5,9 +5,12 @@
 #include <pthread.h>
 #include <unistd.h>
 
+
 #define NUM_FILS_PRODUCTOR 1
 #define NUM_FILS_CONSUMIDOR 2
+#define B_BUFFER 10
 #define N_BLOCK 1000
+
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t prod = PTHREAD_COND_INITIALIZER;
@@ -275,7 +278,7 @@ int extract_fields_airport(char *origin, char *destination, char *line)
 }
 
 void printids(const char *s)
-{
+{ 
   pid_t pid;
   pthread_t tid;
 
@@ -284,13 +287,19 @@ void printids(const char *s)
   printf("%s pid %u tid %u (0x%x)\n", s, (unsigned int)pid, (unsigned int)tid, (unsigned int)tid);
 }
 
-typedef struct Queue
-{
-  char **line;
+typedef struct Node{
+  char** lines;
+  int nelems;
+} Node;
+
+typedef struct Queue{
+  Node* buffer;
   int front;
   int rear;
   int size;
+  pthread_mutex_t lock;
 } Queue;
+
 
 Queue *CreateQueue()
 {
@@ -300,22 +309,35 @@ Queue *CreateQueue()
     printf("ERROR: could creat queue\n");
     exit(1);
   }
-  queue->line = (char **)malloc_matrix(N_BLOCK, MAXCHAR, sizeof(char));
+
+  int i;
+
+  // queue->buffer = NULL;
+
+  // queue->buffer = (void **)malloc(sizeof(void *) * B_BUFFER);
+  // for (i = 0; i < B_BUFFER; i++){
+  //   queue->buffer[i] = NULL;
+  //   queue->buffer[i] = (void *)calloc(1, sizeof(char) * N_BLOCK);
+  // }
+
   queue->front = -1;
   queue->rear = -1;
   queue->size = 0;
+
+  pthread_mutex_init(&queue->lock, NULL);
   return queue;
 }
 
 void destroyQueue(Queue *queue)
 {
-  free_matrix((void **)queue->line, N_BLOCK);
+  free_matrix((void **)queue->buffer, B_BUFFER);
   free(queue);
+  queue = NULL;
 }
 
 int isFull(Queue *queue)
 {
-  return (queue->size == N_BLOCK);
+  return (queue->size == B_BUFFER);
 }
 
 int isEmpty(Queue *queue)
@@ -323,36 +345,43 @@ int isEmpty(Queue *queue)
   return (queue->size == 0);
 }
 
-int addElement(Queue *queue, char *info)
-{
+int addElement(Queue *queue, Node *info){
+
+  pthread_mutex_lock(&queue->lock);
+  
   if (isFull(queue))
   {
-    return 0;
+    return 0; // fail
   }
   queue->rear++;
   queue->rear %= N_BLOCK;
   queue->size++;
-  queue->line[queue->rear] = info;
-  return 1;
+  queue->buffer[queue->rear] = info;
+  
+  pthread_mutex_unlock(&queue->lock);
+
+  return 1; // success
 }
 
-char *getElement(Queue *queue)
+Node* getElement(Queue *queue)
 {
+
+  pthread_mutex_lock(&queue->lock);
+
   if (isEmpty(queue))
   {
     return NULL;
   }
+
   queue->front++;
   queue->front %= N_BLOCK;
   queue->size--;
-  return queue->line[queue->front];
+
+  pthread_mutex_unlock(&queue->lock);
+
+  return queue->buffer[queue->front];
 }
 
-typedef struct cell
-{
-  int nelems;
-  char **lines;
-} cell;
 
 typedef struct param_prod
 {
@@ -362,6 +391,7 @@ typedef struct param_prod
 
 typedef struct param_cons
 {
+  FILE *fp2;
   int **num_flights;
   char **airports;
   Queue *queue;
@@ -433,8 +463,18 @@ void *productor(void *arg){
     while (isFull(queue)){
       pthread_cond_wait(&prod, &mutex);
     }
-    fgets(temp, MAXCHAR, fp);
+    
+    Node* temp = (void *)malloc(sizeof(Node));
+    temp->lines = (char **) malloc_matrix(N_BLOCK, MAXCHAR, sizeof(char));
+    temp->nelems = 0;
+    while (fgets(temp->lines[temp->nelems], MAXCHAR, fp) != NULL){
+      temp->nelems++;
+    }
+
     addElement(queue, temp);
+
+    printids("productor nou fil: ");
+
     pthread_cond_signal(&cons);
     pthread_mutex_unlock(&mutex);
 
@@ -444,42 +484,59 @@ void *productor(void *arg){
     }
   }
 
+
+  fclose(fp);
   return ((void *)0);
 }
 
 void *consumidor(void *arg){
 
   param_cons *par = (struct param_cons *)arg;
+  FILE *fp2 = par->fp2;
   int **num_flights = par->num_flights;
   char **airports = par->airports;
   Queue *queue = par->queue;
 
   char origin[STR_CODE_AIRPORT], destination[STR_CODE_AIRPORT];
   int invalid, index_origin, index_destination;
-  char *temp = "";
 
-  while (!isEmpty(queue)){
+  while (1){
     pthread_mutex_lock(&mutex);
     while (isEmpty(queue)){
       pthread_cond_wait(&cons, &mutex);
     }
 
-    temp = getElement(queue);
-    invalid = extract_fields_airport(origin, destination, temp);
+    Node* temp = getElement(queue);
 
-    if (!invalid){
-      index_origin = get_index_airport(origin, airports);
-      index_destination = get_index_airport(destination, airports);
+    printids("consum nou fil: ");
 
-      if ((index_origin >= 0) && (index_destination >= 0)){
-        num_flights[index_origin][index_destination]++;
+    for (int i = 0; i < temp->nelems; i++){
+      
+      invalid = extract_fields_airport(origin, destination, temp->lines[temp->nelems]);
+
+      if (!invalid){
+        index_origin = get_index_airport(origin, airports);
+        index_destination = get_index_airport(destination, airports);
+
+        if ((index_origin >= 0) && (index_destination >= 0)){
+          num_flights[index_origin][index_destination]++;
+        }
       }
+    
     }
+    
+
 
     pthread_cond_signal(&prod);
     pthread_mutex_unlock(&mutex);
+
+    if (feof(fp2))
+    {
+      break;
+    }
   }
 
+  fclose(fp2);
   return ((void *)0);
 }
 
@@ -488,7 +545,6 @@ void *consumidor(void *arg){
  * esta funcion lee cada linea del fichero y actualiza la matriz num_flights
  * para saber cuantos vuelos hay entre cada cuidad origen y destino.
  */
-
 void read_airports_data(int **num_flights, char **airports, char *fname)
 {
   char line[MAXCHAR];
@@ -523,6 +579,7 @@ void read_airports_data(int **num_flights, char **airports, char *fname)
 
   // thread consumidor
   for (i = 0; i < NUM_FILS_CONSUMIDOR; i++){
+    par_cons[i].fp2 = fp;
     par_cons[i].num_flights = num_flights;
     par_cons[i].airports = airports;
     par_cons[i].queue = queue;
