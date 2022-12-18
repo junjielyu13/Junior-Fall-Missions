@@ -120,7 +120,7 @@ class Aichess():
         white_rook_pos = mystate[0] if mystate[0][2] == 2 else mystate[1]   # Get white Rook position
         white_king_pos = mystate[1] if mystate[1][2] == 6 else mystate[0]   # Get white King position
 
-        # Check if black King is in the checkmate range
+        
         if (white_king_pos[1] != black_king_pos[1]) or \
             (white_rook_pos[0] != black_king_pos[0]) or \
             (white_king_pos[0] - 2 != black_king_pos[0]) or \
