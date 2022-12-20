@@ -526,10 +526,7 @@ def movePiece(chess, currentState, nextState):
     return
 
 
-if __name__ == "__main__":
-
-    initLogging()
-
+def practica2():
     # intiialize board
     # current state initialization
     TA = np.zeros((8, 8))
@@ -552,63 +549,59 @@ if __name__ == "__main__":
     WhitePlayerAichess = aichess.Aichess(TA, True, True)
     BlackPlayerAichess = aichess.Aichess(TA, False, True)
 
+    #-------------------------- MiniMax --------------------------------------- #
+    print("#-------------------------- MiniMax --------------------------------------- #")
 
 
+    WhitePlayerMinimax = copy.deepcopy(WhitePlayerAichess)
+    BlackPlayerMinimax = copy.deepcopy(BlackPlayerAichess)
 
+    depth = 2
+    while not GameOver(chess.board.board):
 
-    # #-------------------------- MiniMax --------------------------------------- #
-    # print("#-------------------------- MiniMax --------------------------------------- #")
+        # ----------------White Player -------------------------------- #
+        print("White player minimax: ")
+        WhitePlayerCurrentState = copy.deepcopy(chess.board.currentStateW)
+        WhitePlayerMinimax.chess = copy.deepcopy(chess)
+        WhitePlayerMinimax.chessStack = [copy.deepcopy(WhitePlayerMinimax.chess)]
 
-
-    # WhitePlayerMinimax = copy.deepcopy(WhitePlayerAichess)
-    # BlackPlayerMinimax = copy.deepcopy(BlackPlayerAichess)
-
-    # depth = 2
-    # while not GameOver(chess.board.board):
-
-    #     # ----------------White Player -------------------------------- #
-    #     print("White player minimax: ")
-    #     WhitePlayerCurrentState = copy.deepcopy(chess.board.currentStateW)
-    #     WhitePlayerMinimax.chess = copy.deepcopy(chess)
-    #     WhitePlayerMinimax.chessStack = [copy.deepcopy(WhitePlayerMinimax.chess)]
-
-    #     WhitePlayerMinimax.currentStateW = copy.deepcopy(chess.board.currentStateW)
-    #     WhitePlayerMinimax.currentStateB = copy.deepcopy(chess.board.currentStateB)
-    #     WhitePlayerMinimax.innitialStateW = copy.deepcopy(chess.board.currentStateW)
-    #     WhitePlayerMinimax.innitialStateB = copy.deepcopy(chess.board.currentStateB)
-    #     WhitePlayerNextState = WhitePlayerMinimax.Minimax(depth)
-    #     print(WhitePlayerCurrentState)
+        WhitePlayerMinimax.currentStateW = copy.deepcopy(chess.board.currentStateW)
+        WhitePlayerMinimax.currentStateB = copy.deepcopy(chess.board.currentStateB)
+        WhitePlayerMinimax.innitialStateW = copy.deepcopy(chess.board.currentStateW)
+        WhitePlayerMinimax.innitialStateB = copy.deepcopy(chess.board.currentStateB)
+        WhitePlayerNextState = WhitePlayerMinimax.Minimax(depth)
+        print(WhitePlayerCurrentState)
 
     
-    #     print(WhitePlayerNextState)
+        print(WhitePlayerNextState)
 
-    #     movePiece(chess, WhitePlayerCurrentState, WhitePlayerNextState)
-    #     chess.board.print_board()
+        movePiece(chess, WhitePlayerCurrentState, WhitePlayerNextState)
+        chess.board.print_board()
 
-    #     if GameOver(chess.board.board):
-    #         break
+        if GameOver(chess.board.board):
+            break
     
 
-    #     # ----------------Black Player -------------------------------- #
-    #     print("Black player minimax: ")
-    #     BlackPlayerCurrentState = copy.deepcopy(chess.board.currentStateB)
-    #     BlackPlayerMinimax.chess = copy.deepcopy(chess)
-    #     BlackPlayerMinimax.chessStack = [copy.deepcopy(BlackPlayerMinimax.chess)]
+        # ----------------Black Player -------------------------------- #
+        print("Black player minimax: ")
+        BlackPlayerCurrentState = copy.deepcopy(chess.board.currentStateB)
+        BlackPlayerMinimax.chess = copy.deepcopy(chess)
+        BlackPlayerMinimax.chessStack = [copy.deepcopy(BlackPlayerMinimax.chess)]
 
-    #     BlackPlayerMinimax.currentStateW = copy.deepcopy(chess.board.currentStateW)
-    #     BlackPlayerMinimax.currentStateB = copy.deepcopy(chess.board.currentStateB)
-    #     BlackPlayerMinimax.innitialStateW = copy.deepcopy(chess.board.currentStateW)
-    #     BlackPlayerMinimax.innitialStateB = copy.deepcopy(chess.board.currentStateB)
+        BlackPlayerMinimax.currentStateW = copy.deepcopy(chess.board.currentStateW)
+        BlackPlayerMinimax.currentStateB = copy.deepcopy(chess.board.currentStateB)
+        BlackPlayerMinimax.innitialStateW = copy.deepcopy(chess.board.currentStateW)
+        BlackPlayerMinimax.innitialStateB = copy.deepcopy(chess.board.currentStateB)
 
-    #     BlackPlayerNextState = BlackPlayerMinimax.Minimax(depth)
-    #     print(BlackPlayerCurrentState)
-    #     print(BlackPlayerNextState)
+        BlackPlayerNextState = BlackPlayerMinimax.Minimax(depth)
+        print(BlackPlayerCurrentState)
+        print(BlackPlayerNextState)
 
-    #     movePiece(chess, BlackPlayerCurrentState, BlackPlayerNextState)
-    #     chess.board.print_board()
+        movePiece(chess, BlackPlayerCurrentState, BlackPlayerNextState)
+        chess.board.print_board()
 
-    #     if GameOver(chess.board.board):
-    #         break
+        if GameOver(chess.board.board):
+            break
         
         
 
@@ -678,58 +671,97 @@ if __name__ == "__main__":
 
 
 
-    # # -----------------------------Expect Max-------------------------------- #
-    # print("# -----------------------------Expect Max-------------------------------- #")
+    # -----------------------------Expect Max-------------------------------- #
+    print("# -----------------------------Expect Max-------------------------------- #")
 
-    # WhitePlayerExpectMax = copy.deepcopy(WhitePlayerAichess)
-    # BlackPlayerExpectMax = copy.deepcopy(BlackPlayerAichess)
-
-
-    # while not GameOver(chess.board.board):
-
-    #     # ----------------White Player -------------------------------- #
-    #     print("White player ExpectMax: ")
-    #     BlackPlayerCurrentState = copy.deepcopy(chess.board.currentStateB)
-    #     WhitePlayerExpectMax.chess = copy.deepcopy(chess)
-    #     WhitePlayerExpectMax.chessStack = [copy.deepcopy(WhitePlayerExpectMax.chess)]
-
-    #     WhitePlayerExpectMax.currentStateW = copy.deepcopy(chess.board.currentStateW)
-    #     WhitePlayerExpectMax.currentStateB = copy.deepcopy(chess.board.currentStateB)
-    #     WhitePlayerExpectMax.innitialStateW = copy.deepcopy(chess.board.currentStateW)
-    #     WhitePlayerExpectMax.innitialStateB = copy.deepcopy(chess.board.currentStateB)
-    #     WhitePlayerNextState = WhitePlayerExpectMax.ExpectiMax()
+    WhitePlayerExpectMax = copy.deepcopy(WhitePlayerAichess)
+    BlackPlayerExpectMax = copy.deepcopy(BlackPlayerAichess)
 
 
-    #     print(WhitePlayerCurrentState)
-    #     print(WhitePlayerNextState)
+    while not GameOver(chess.board.board):
 
-    #     movePiece(chess, WhitePlayerCurrentState, WhitePlayerNextState)
-    #     chess.board.print_board()
+        # ----------------White Player -------------------------------- #
+        print("White player ExpectMax: ")
+        BlackPlayerCurrentState = copy.deepcopy(chess.board.currentStateB)
+        WhitePlayerExpectMax.chess = copy.deepcopy(chess)
+        WhitePlayerExpectMax.chessStack = [copy.deepcopy(WhitePlayerExpectMax.chess)]
 
-    #     if GameOver(chess.board.board):
-    #         break
+        WhitePlayerExpectMax.currentStateW = copy.deepcopy(chess.board.currentStateW)
+        WhitePlayerExpectMax.currentStateB = copy.deepcopy(chess.board.currentStateB)
+        WhitePlayerExpectMax.innitialStateW = copy.deepcopy(chess.board.currentStateW)
+        WhitePlayerExpectMax.innitialStateB = copy.deepcopy(chess.board.currentStateB)
+        WhitePlayerNextState = WhitePlayerExpectMax.ExpectiMax()
 
 
-    #     # ----------------Black Player -------------------------------- #
-    #     print("Black player ExpectMax: ")
-    #     BlackPlayerCurrentState = copy.deepcopy(chess.board.currentStateB)
-    #     BlackPlayerExpectMax.chess = copy.deepcopy(chess)
-    #     BlackPlayerExpectMax.chessStack = [copy.deepcopy(BlackPlayerExpectMax.chess)]
+        print(WhitePlayerCurrentState)
+        print(WhitePlayerNextState)
 
-    #     BlackPlayerExpectMax.currentStateW = copy.deepcopy(chess.board.currentStateW)
-    #     BlackPlayerExpectMax.currentStateB = copy.deepcopy(chess.board.currentStateB)
-    #     BlackPlayerExpectMax.innitialStateW = copy.deepcopy(chess.board.currentStateW)
-    #     BlackPlayerExpectMax.innitialStateB = copy.deepcopy(chess.board.currentStateB)
+        movePiece(chess, WhitePlayerCurrentState, WhitePlayerNextState)
+        chess.board.print_board()
 
-    #     BlackPlayerNextState = BlackPlayerExpectMax.ExpectiMax()
-    #     print(BlackPlayerCurrentState)
-    #     print(BlackPlayerNextState)
+        if GameOver(chess.board.board):
+            break
 
-    #     movePiece(chess, BlackPlayerCurrentState, BlackPlayerNextState)
-    #     chess.board.print_board()
 
-    #     if GameOver(chess.board.board):
-    #         break
+        # ----------------Black Player -------------------------------- #
+        print("Black player ExpectMax: ")
+        BlackPlayerCurrentState = copy.deepcopy(chess.board.currentStateB)
+        BlackPlayerExpectMax.chess = copy.deepcopy(chess)
+        BlackPlayerExpectMax.chessStack = [copy.deepcopy(BlackPlayerExpectMax.chess)]
+
+        BlackPlayerExpectMax.currentStateW = copy.deepcopy(chess.board.currentStateW)
+        BlackPlayerExpectMax.currentStateB = copy.deepcopy(chess.board.currentStateB)
+        BlackPlayerExpectMax.innitialStateW = copy.deepcopy(chess.board.currentStateW)
+        BlackPlayerExpectMax.innitialStateB = copy.deepcopy(chess.board.currentStateB)
+
+        BlackPlayerNextState = BlackPlayerExpectMax.ExpectiMax()
+        print(BlackPlayerCurrentState)
+        print(BlackPlayerNextState)
+
+        movePiece(chess, BlackPlayerCurrentState, BlackPlayerNextState)
+        chess.board.print_board()
+
+        if GameOver(chess.board.board):
+            break
+
+
+
+
+def exercici1():
+    # intiialize board
+    # current state initialization
+    TA = np.zeros((8, 8))
+
+    # white pieces
+    TA[7][5] = 6        # white king
+    TA[7][0] = 2        # white rook
+
+    # black pieces
+    TA[0][5] = 12       # black king
+
+
+    # initialize board
+    chess = Chess(TA)
+    # print board
+    chess.board.print_board()
+
+    WhitePlayerAichess = aichess.Aichess(TA, True, True)
+    WhitePlayerAichess.Q_Learning()
+
+
+def exercici2():
+    pass
+
+if __name__ == "__main__":
+
+    initLogging()
+
+
+    exercici1()
+
+    
+
+
         
 
 

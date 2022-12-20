@@ -24,6 +24,9 @@ from itertools import permutations
 from collections import defaultdict
 from queue import PriorityQueue, Queue
 
+import pandas as pd
+import ast
+
 
 class Aichess():
     """
@@ -85,6 +88,13 @@ class Aichess():
         self.paths['path'] = []
         self.paths['visited'] = []
 
+
+        # Q-learning 
+        self.lr = 0.1
+        self.gamma = 0.9
+        self.epsilon = 0.95
+        self.episode = 2000
+        self.qTable = dict()
 
 
     def getCurrentState(self):
@@ -399,7 +409,6 @@ class Aichess():
         start = [e for e in currentState if e not in nextState][0][0:2]
         to = [e for e in nextState if e not in currentState][0][0:2]
         return self.chess.moveSimGetPoint(start, to)
-
 
 
     def evaluateBoard(self, mystate, oppstate):
@@ -785,15 +794,7 @@ class Aichess():
 
         return  Minimax_aux(self.currentStateW, self.currentStateB, depth, True)[1]
            
-
         
-        
-
-
-
-
-
-
     def AlphaBeta(self, depth = 4):
         
 
@@ -993,9 +994,6 @@ class Aichess():
         return AlphaBeta_aux(self.currentStateW, self.currentStateB, depth,  -float('inf'), float('inf'), True)[1]
 
 
-
-
-
     def ExpectiMax(self, depth = 3):
 
 
@@ -1190,6 +1188,101 @@ class Aichess():
 
         return Expectimax_aux(self.currentStateW, self.currentStateB, depth, True)[1]
 
+
+
+
+    def updateAcciones(self, state):
+
+        if str(state) not in self.qTable.keys():    
+            self.qTable[str(state)] = dict()
+            
+        nextstatelist = copy.deepcopy(self.getListNextStates(state))
+        for nextstate in nextstatelist:
+            if str(nextstate) not in self.qTable[str(state)].keys():
+                self.qTable[str(state)][str(nextstate)] = 0
+
+
+    
+    def chooseAction(self, state):
+
+        self.updateAcciones(state)
+        nextstatelist = copy.deepcopy(self.getListNextStates(state))
+        # logging.debug(state)
+        # logging.info(nextstatelist)
+        
+        if np.random.uniform() < self.epsilon:
+            stateActionList = self.qTable[str(state)]
+            max_list = []
+            max_value = max(stateActionList.values())
+            for k, v in stateActionList.items():
+                if v == max_value:
+                    max_list.append(k)
+            action = np.random.choice(max_list)
+        else:
+            choicelist = []
+            for nextstate in nextstatelist:
+                choicelist.append(str(nextstate))
+            action = np.random.choice(choicelist)
+
+        return ast.literal_eval(action)
+
+
+    def feelBack(self, state, action):
+        nextstate = action
+        if self.isCheckMate(state):
+            reword =  100
+        else:
+            reword = -1
+        return nextstate, reword
+
+    def updateTable(self, state, action, nextState, reword):
+        self.updateAcciones(nextState)
+
+        qPredict = self.qTable[str(state)][str(action)]
+
+        if self.isCheckMate(nextState):
+            qTarget = reword
+        else:
+            qTarget = reword + self.gamma * max(self.qTable[str(nextState)].values())
+
+        self.qTable[str(state)][str(action)] += self.lr * (qTarget - qPredict)
+
+
+
+    def Q_Learning(self):
+
+        self.listNextStates = copy.deepcopy(self.getListNextStates(self.currentStateW))
+        self.updateAcciones(self.currentStateW)
+
+
+        for episode in range(self.episode):
+
+            state = self.innitialStateW
+            actionSrc = ""
+            while True:
+
+                action = self.chooseAction(state)
+                if episode == self.episode - 1:
+                    actionSrc += str(state) + " -> "
+
+                nextState, reword = self.feelBack(state, action)
+
+                self.updateTable(state, action, nextState, reword)
+
+                # self.moveOn(state, action)
+                # self.chess.boardSim.print_board()
+
+                state = nextState
+
+                if self.isCheckMate(action):
+                    #print("hack")
+                    actionSrc += str(state)
+                    if episode == self.episode - 1:
+                        print(actionSrc)
+                    break
+            
+            if episode % 100 == 0:
+                print(episode)
 
 
 
