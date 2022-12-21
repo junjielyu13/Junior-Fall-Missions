@@ -747,11 +747,65 @@ def exercici1():
 
     WhitePlayerAichess = aichess.Aichess(TA, True, True)
     start = time.time()
-    path = WhitePlayerAichess.Q_Learning()
+    #path = WhitePlayerAichess.Q_Learning()
     end = time.time()
+    # path = [
+    #         [[7, 0, 2], [7, 5, 6]],
+    #         [[0, 0, 2], [7, 5, 6]], 
+    #         [[6, 4, 6], [0, 0, 2]],
+    #         [[5, 3, 6], [0, 0, 2]], 
+    #         [[4, 3, 6], [0, 0, 2]], 
+    #         [[3, 4, 6], [0, 0, 2]], 
+    #         [[2, 5, 6], [0, 0, 2]],
+    #         ]
 
     startState = path[0]
+
     path = path[1:]
+
+    for nextState in path:
+        aichess.movePiece(WhitePlayerAichess, startState, nextState)
+        startState = nextState
+        WhitePlayerAichess.chess.board.print_board()
+    print("Q-Learning time = ", end - start, "s")
+
+
+def exercici3():
+    # intiialize board
+    # current state initialization
+    TA = np.zeros((8, 8))
+
+    # white pieces
+    TA[7][5] = 6        # white king
+
+    # black pieces
+    TA[0][5] = 12       # black king
+    TA[0][0] = 8        # black rook
+
+
+    # initialize board
+    chess = Chess(TA)
+    # print board
+    chess.board.print_board()
+
+    WhitePlayerAichess = aichess.Aichess(TA, False, True, episode=1)
+    start = time.time()
+    path = WhitePlayerAichess.Q_Learning()
+    end = time.time()
+    # path = [
+    #         [[7, 0, 2], [7, 5, 6]],
+    #         [[0, 0, 2], [7, 5, 6]], 
+    #         [[6, 4, 6], [0, 0, 2]],
+    #         [[5, 3, 6], [0, 0, 2]], 
+    #         [[4, 3, 6], [0, 0, 2]], 
+    #         [[3, 4, 6], [0, 0, 2]], 
+    #         [[2, 5, 6], [0, 0, 2]],
+    #         ]
+
+    startState = path[0]
+
+    path = path[1:]
+
     for nextState in path:
         aichess.movePiece(WhitePlayerAichess, startState, nextState)
         startState = nextState
@@ -778,22 +832,64 @@ def exercici2():
     chess.board.print_board()
 
     WhitePlayerAichess = aichess.Aichess(TA, True, True, 
-                        learning_rate= 0.05, gamma = 0.9, epsilon=0.95, episode=1000)
+                        learning_rate= 0.1, gamma = 0.9, epsilon=0.95, episode=10)
 
     BlackPlayerAichess = aichess.Aichess(TA, False, True, 
-                        learning_rate= 0.05, gamma = 0.9, epsilon=0.95, episode=1000)
+                        learning_rate= 0.1, gamma = 0.9, epsilon=0.95, episode=10)
 
     WhitePlayerAichess.Q_Learning()
                         
+
+    while True:
+
+        # ----------------White Player -------------------------------- #
+        print("white turn")
+        WhitePlayerCurrentState = copy.deepcopy(chess.board.currentStateW)
+        WhitePlayerAichess.chess = copy.deepcopy(chess)
+
+        WhitePlayerAichess.currentStateW = copy.deepcopy(chess.board.currentStateW)
+        WhitePlayerAichess.currentStateB = copy.deepcopy(chess.board.currentStateB)
+        WhitePlayerAichess.innitialStateW = copy.deepcopy(chess.board.currentStateW)
+        WhitePlayerAichess.innitialStateB = copy.deepcopy(chess.board.currentStateB)
+
+        WhitePlayerNextState = WhitePlayerAichess.Q_Learning()
+        nextpath = WhitePlayerNextState[1]
+        movePiece(chess, WhitePlayerCurrentState, nextpath)
+
+        chess.board.print_board()
+
+        if GameOver(chess.board.board):
+            print("Black WIN!!")
+            break
+
+        # ----------------Black Player -------------------------------- #
+        print("black turn")
+        BlackPlayerCurrentState = copy.deepcopy(chess.board.currentStateB)
+        BlackPlayerAichess.chess = copy.deepcopy(chess)
+
+        BlackPlayerAichess.currentStateW = copy.deepcopy(chess.board.currentStateW)
+        BlackPlayerAichess.currentStateB = copy.deepcopy(chess.board.currentStateB)
+        BlackPlayerAichess.innitialStateW = copy.deepcopy(chess.board.currentStateW)
+        BlackPlayerAichess.innitialStateB = copy.deepcopy(chess.board.currentStateB)
+
+        BlackPlayerNextState = BlackPlayerAichess.Q_Learning()
+        nextpath = BlackPlayerNextState[1]
+        movePiece(chess, BlackPlayerCurrentState, nextpath)
+
+        chess.board.print_board()
+
+        if GameOver(chess.board.board):
+            print("Black WIN!!")
+            break
 
 if __name__ == "__main__":
 
     initLogging()
 
 
-    exercici1()
-
-    #exercici2()
+    #exercici1()
+    exercici2()
+    #exercici3()
 
     
 

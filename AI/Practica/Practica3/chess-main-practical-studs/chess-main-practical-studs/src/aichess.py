@@ -186,7 +186,7 @@ class Aichess():
             # Check if white King is in the checkmate range
             if ((black_king_pos[1] != white_king_pos[1]) or
                 (black_rook_pos[0] != white_king_pos[0]) or 
-                (black_king_pos[0] - 2 != white_king_pos[0]) or
+                (black_king_pos[0] + 2 != white_king_pos[0]) or
                 (black_rook_pos[1] in {white_king_pos[1]-1, white_king_pos[1], white_king_pos[1]+1}) 
                ):
                 return False
@@ -1250,15 +1250,23 @@ class Aichess():
 
 
     def Q_Learning(self):
-
-        self.listNextStates = copy.deepcopy(self.getListNextStates(self.currentStateW))
-        self.updateAcciones(self.currentStateW)
+        
+        if self.whitePlayer:
+            self.listNextStates = copy.deepcopy(self.getListNextStates(self.currentStateW))
+            self.updateAcciones(self.currentStateW)
+        else:            
+            self.listNextStates = copy.deepcopy(self.getListNextStates(self.currentStateB))
+            self.updateAcciones(self.currentStateB)
 
         result = []
 
         for episode in range(self.episode):
 
-            state = self.innitialStateW
+            if self.whitePlayer:
+                state = self.innitialStateW
+            else:
+                state = self.innitialStateB
+
             actionSrc = ""
             while True:
 
