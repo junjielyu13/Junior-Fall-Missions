@@ -53,7 +53,7 @@ class Aichess():
         Promotes a pawn that has reached the other side to another, or the same, piece
     """
 
-    def __init__(self, TA, White, myinit=True):
+    def __init__(self, TA, White, myinit=True, learning_rate = 0.1, gamma = 0.9, epsilon = 0.95, episode = 100000):
 
         if myinit:
             self.chess = chess.Chess(TA, True)
@@ -90,10 +90,10 @@ class Aichess():
 
 
         # Q-learning 
-        self.lr = 0.1
-        self.gamma = 0.9
-        self.epsilon = 0.95
-        self.episode = 2000
+        self.lr = learning_rate
+        self.gamma = gamma
+        self.epsilon = epsilon
+        self.episode = episode
         self.qTable = dict()
 
 
@@ -1209,7 +1209,6 @@ class Aichess():
         nextstatelist = copy.deepcopy(self.getListNextStates(state))
         # logging.debug(state)
         # logging.info(nextstatelist)
-        
         if np.random.uniform() < self.epsilon:
             stateActionList = self.qTable[str(state)]
             max_list = []
@@ -1235,6 +1234,7 @@ class Aichess():
             reword = -1
         return nextstate, reword
 
+
     def updateTable(self, state, action, nextState, reword):
         self.updateAcciones(nextState)
 
@@ -1254,6 +1254,7 @@ class Aichess():
         self.listNextStates = copy.deepcopy(self.getListNextStates(self.currentStateW))
         self.updateAcciones(self.currentStateW)
 
+        result = []
 
         for episode in range(self.episode):
 
@@ -1263,27 +1264,27 @@ class Aichess():
 
                 action = self.chooseAction(state)
                 if episode == self.episode - 1:
-                    actionSrc += str(state) + " -> "
+                    actionSrc += str(state) + " -> \n"
+                    result.append(state)
 
                 nextState, reword = self.feelBack(state, action)
 
                 self.updateTable(state, action, nextState, reword)
 
-                # self.moveOn(state, action)
-                # self.chess.boardSim.print_board()
-
                 state = nextState
 
                 if self.isCheckMate(action):
-                    #print("hack")
-                    actionSrc += str(state)
                     if episode == self.episode - 1:
+                        actionSrc += str(state) + " .\n"
+                        result.append(state)
                         print(actionSrc)
+                    
                     break
             
-            if episode % 100 == 0:
+            if episode % 1000 == 0:
                 print(episode)
 
+        return result
 
 
 def translate(s):

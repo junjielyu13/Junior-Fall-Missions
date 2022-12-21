@@ -5,7 +5,7 @@ import aichess
 
 from lib import initLogging, logging
 
-
+import time
 import numpy as np
 from queue import Queue
 import copy
@@ -746,11 +746,45 @@ def exercici1():
     chess.board.print_board()
 
     WhitePlayerAichess = aichess.Aichess(TA, True, True)
-    WhitePlayerAichess.Q_Learning()
+    start = time.time()
+    path = WhitePlayerAichess.Q_Learning()
+    end = time.time()
+
+    startState = path[0]
+    path = path[1:]
+    for nextState in path:
+        aichess.movePiece(WhitePlayerAichess, startState, nextState)
+        startState = nextState
+        WhitePlayerAichess.chess.board.print_board()
+    print("Q-Learning time = ", end - start, "s")
 
 
 def exercici2():
-    pass
+    # intiialize board
+    # current state initialization
+    TA = np.zeros((8, 8))
+
+    # white pieces
+    TA[7][5] = 6        # white king
+    TA[7][0] = 2        # white rook
+
+    # black pieces
+    TA[0][5] = 12       # black king
+    TA[0][0] = 8        # black rook
+
+    # initialize board
+    chess = Chess(TA)
+    # print board
+    chess.board.print_board()
+
+    WhitePlayerAichess = aichess.Aichess(TA, True, True, 
+                        learning_rate= 0.05, gamma = 0.9, epsilon=0.95, episode=1000)
+
+    BlackPlayerAichess = aichess.Aichess(TA, False, True, 
+                        learning_rate= 0.05, gamma = 0.9, epsilon=0.95, episode=1000)
+
+    WhitePlayerAichess.Q_Learning()
+                        
 
 if __name__ == "__main__":
 
@@ -758,6 +792,8 @@ if __name__ == "__main__":
 
 
     exercici1()
+
+    #exercici2()
 
     
 
