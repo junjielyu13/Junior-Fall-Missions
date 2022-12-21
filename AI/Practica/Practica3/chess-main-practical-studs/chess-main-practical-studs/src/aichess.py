@@ -1225,6 +1225,7 @@ class Aichess():
                 if v == max_value:
                     max_list.append(k)
             action = np.random.choice(max_list)
+            
         # The remaining probabilities randomly choose one
         else:
             choicelist = []
@@ -1241,7 +1242,7 @@ class Aichess():
         '''
         nextstate = action
         if self.isCheckMate(state):
-            reword =  100
+            reword = 100
         else:
             reword = -1
         return nextstate, reword

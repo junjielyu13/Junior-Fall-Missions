@@ -839,9 +839,10 @@ if __name__ == "__main__":
 
 
 
-
+    # Q-learning shortest path
     exercici1()
 
+    # Q-learning AI confrontation game
     #exercici2()
 
     
