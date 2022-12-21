@@ -1192,7 +1192,9 @@ class Aichess():
 
 
     def updateAcciones(self, state):
-
+        '''
+        Add to qTable after encountering a new state
+        '''
         if str(state) not in self.qTable.keys():    
             self.qTable[str(state)] = dict()
             
@@ -1204,12 +1206,18 @@ class Aichess():
 
     
     def chooseAction(self, state):
+        '''
+        Select Action from qTable based on state
+        '''
 
+        # Determine whether the state exists in the qtable
         self.updateAcciones(state)
         nextstatelist = copy.deepcopy(self.getListNextStates(state))
-        # logging.debug(state)
-        # logging.info(nextstatelist)
+
+        # Choose an action to take  
+        # According to the probability of epsilon, select according to the best in qTable
         if np.random.uniform() < self.epsilon:
+            # If there are multiple best actions, choose one of them at random
             stateActionList = self.qTable[str(state)]
             max_list = []
             max_value = max(stateActionList.values())
@@ -1217,6 +1225,7 @@ class Aichess():
                 if v == max_value:
                     max_list.append(k)
             action = np.random.choice(max_list)
+        # The remaining probabilities randomly choose one
         else:
             choicelist = []
             for nextstate in nextstatelist:
@@ -1227,6 +1236,9 @@ class Aichess():
 
 
     def feelBack(self, state, action):
+        '''
+        Return the next state and current reward according to State and action
+        '''
         nextstate = action
         if self.isCheckMate(state):
             reword =  100
@@ -1236,21 +1248,30 @@ class Aichess():
 
 
     def updateTable(self, state, action, nextState, reword):
+        '''
+        Update qtable according to current state, action, next state, reward
+        '''
+
+        # Determine whether the state exists in the qtable
         self.updateAcciones(nextState)
 
+        # current state value
         qPredict = self.qTable[str(state)][str(action)]
 
+        # next state value
         if self.isCheckMate(nextState):
             qTarget = reword
         else:
             qTarget = reword + self.gamma * max(self.qTable[str(nextState)].values())
 
+        # update qTable
         self.qTable[str(state)][str(action)] += self.lr * (qTarget - qPredict)
 
 
 
     def Q_Learning(self):
         
+        # select white player or black player
         if self.whitePlayer:
             self.listNextStates = copy.deepcopy(self.getListNextStates(self.currentStateW))
             self.updateAcciones(self.currentStateW)
@@ -1261,7 +1282,8 @@ class Aichess():
         result = []
 
         for episode in range(self.episode):
-
+            
+            # init state
             if self.whitePlayer:
                 state = self.innitialStateW
             else:
@@ -1269,18 +1291,23 @@ class Aichess():
 
             actionSrc = ""
             while True:
-
+                
+                # choose action
                 action = self.chooseAction(state)
                 if episode == self.episode - 1:
                     actionSrc += str(state) + " -> \n"
                     result.append(state)
 
+                # get state and reward
                 nextState, reword = self.feelBack(state, action)
 
+                # update qTable
                 self.updateTable(state, action, nextState, reword)
 
+                # update state
                 state = nextState
 
+                # Termination condition
                 if self.isCheckMate(action):
                     if episode == self.episode - 1:
                         actionSrc += str(state) + " .\n"

@@ -747,60 +747,9 @@ def exercici1():
 
     WhitePlayerAichess = aichess.Aichess(TA, True, True)
     start = time.time()
-    #path = WhitePlayerAichess.Q_Learning()
-    end = time.time()
-    # path = [
-    #         [[7, 0, 2], [7, 5, 6]],
-    #         [[0, 0, 2], [7, 5, 6]], 
-    #         [[6, 4, 6], [0, 0, 2]],
-    #         [[5, 3, 6], [0, 0, 2]], 
-    #         [[4, 3, 6], [0, 0, 2]], 
-    #         [[3, 4, 6], [0, 0, 2]], 
-    #         [[2, 5, 6], [0, 0, 2]],
-    #         ]
-
-    startState = path[0]
-
-    path = path[1:]
-
-    for nextState in path:
-        aichess.movePiece(WhitePlayerAichess, startState, nextState)
-        startState = nextState
-        WhitePlayerAichess.chess.board.print_board()
-    print("Q-Learning time = ", end - start, "s")
-
-
-def exercici3():
-    # intiialize board
-    # current state initialization
-    TA = np.zeros((8, 8))
-
-    # white pieces
-    TA[7][5] = 6        # white king
-
-    # black pieces
-    TA[0][5] = 12       # black king
-    TA[0][0] = 8        # black rook
-
-
-    # initialize board
-    chess = Chess(TA)
-    # print board
-    chess.board.print_board()
-
-    WhitePlayerAichess = aichess.Aichess(TA, False, True, episode=1)
-    start = time.time()
     path = WhitePlayerAichess.Q_Learning()
     end = time.time()
-    # path = [
-    #         [[7, 0, 2], [7, 5, 6]],
-    #         [[0, 0, 2], [7, 5, 6]], 
-    #         [[6, 4, 6], [0, 0, 2]],
-    #         [[5, 3, 6], [0, 0, 2]], 
-    #         [[4, 3, 6], [0, 0, 2]], 
-    #         [[3, 4, 6], [0, 0, 2]], 
-    #         [[2, 5, 6], [0, 0, 2]],
-    #         ]
+
 
     startState = path[0]
 
@@ -811,6 +760,8 @@ def exercici3():
         startState = nextState
         WhitePlayerAichess.chess.board.print_board()
     print("Q-Learning time = ", end - start, "s")
+
+
 
 
 def exercici2():
@@ -887,9 +838,11 @@ if __name__ == "__main__":
     initLogging()
 
 
-    #exercici1()
-    exercici2()
-    #exercici3()
+
+
+    exercici1()
+
+    #exercici2()
 
     
 
