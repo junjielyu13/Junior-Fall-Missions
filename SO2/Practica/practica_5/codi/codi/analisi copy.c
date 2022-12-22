@@ -285,40 +285,32 @@ void printids(const char *s)
   printf("%s pid %u tid %u (0x%x)\n", s, (unsigned int)pid, (unsigned int)tid, (unsigned int)tid);
 }
 
-
-typedef struct Node {
+typedef struct Node
+{
   char **lines;
   int nelems;
 } Node;
 
-
-// create a new Node
-Node *CreateNode()
-{
-
+Node *CreateNode(){
 
   Node *node = malloc(sizeof(Node));
-  if (!node)
-  {
+  if (!node){
     printf("ERROR: could not allocate memory for node\n");
     exit(1);
   }
 
   node->lines = malloc(sizeof(char *) * N_BLOCK);
-  if (!node->lines)
-  {
+  if (!node->lines){
     printf("ERROR: could not allocate memory for lines in node\n");
     free(node);
     exit(1);
   }
 
   int i;
-  for (i = 0; i < N_BLOCK; i++)
-  {
+  for (i = 0; i < N_BLOCK; i++){
     node->lines[i] = calloc(1, sizeof(char) * MAXCHAR);
-
-    if (!node->lines[i])
-    {
+    
+    if (!node->lines[i]){
       printf("ERROR: could not allocate memory for line of lines in node\n");
       free(node->lines);
       free(node);
@@ -331,7 +323,6 @@ Node *CreateNode()
   return node;
 }
 
-//  Destory node 
 void DestroyNode(Node *node)
 {
   int i;
@@ -351,34 +342,30 @@ typedef struct Queue
   int rear;
   int size;
   int capacity;
-  int finish;
   pthread_mutex_t lock;
+  pthread_cond_t full, empty;
 } Queue;
 
-// create a queue for buffer 
-Queue *CreateQueue()
-{
+Queue *CreateQueue(){
 
   Queue *queue = malloc(sizeof(Queue));
-  if (!queue)
-  {
+  if (!queue){
     printf("ERROR: could not allocate memory for queue\n");
     exit(1);
   }
 
   int i, j;
 
-  queue->buffer = malloc(sizeof(Node *) * B_BUFFER);
-  if (!queue->buffer)
-  {
+  queue->buffer = malloc(sizeof(Node* ) * B_BUFFER);
+  if (!queue->buffer){
     printf("ERROR: could not allocate memory for queue buffer\n");
     free(queue);
     exit(1);
   }
 
-  for (i = 0; i < B_BUFFER; i++)
-  {
-    queue->buffer[i] = malloc(sizeof(Node *));
+  for (i = 0; i < B_BUFFER; i++){
+    //queue->buffer[i] = CreateNode();
+    queue->buffer[i] = malloc(sizeof(Node* ));
     if (!queue->buffer[i])
     {
       printf("ERROR: could not allocate memory for lines in queue buffer\n");
@@ -417,8 +404,9 @@ Queue *CreateQueue()
   queue->rear = -1;
   queue->size = 0;
   queue->capacity = B_BUFFER;
-  queue->finish = 0;
 
+  pthread_cond_init(&queue->empty, NULL);
+  pthread_cond_init(&queue->full, NULL);
   int result = pthread_mutex_init(&queue->lock, NULL);
   if (result != 0)
   {
@@ -431,7 +419,6 @@ Queue *CreateQueue()
   return queue;
 }
 
-// destroy queue
 void DestroyQueue(Queue *queue)
 {
 
@@ -457,27 +444,26 @@ int isFull(Queue *queue)
 {
   return (queue->size == queue->capacity);
 }
- 
+
 int isEmpty(Queue *queue)
 {
   return (queue->size == 0);
 }
 
-// insert node into queue
 int addElement(Queue *queue, Node *info)
 {
 
-  int result = pthread_mutex_lock(&queue->lock);
-  if (result != 0)
-  {
-    printf("ERROR: could not acquire lock on mutex\n");
-    return 0; // fail
-  }
+  // int result = pthread_mutex_lock(&queue->lock);
+  // if (result != 0)
+  // {
+  //   printf("ERROR: could not acquire lock on mutex\n");
+  //   return 0; // fail
+  // }
 
   if (isFull(queue))
   {
     printf("ERROR: queue is full\n");
-    pthread_mutex_unlock(&queue->lock);
+    //pthread_mutex_unlock(&queue->lock);
     return 0; // fail
   }
 
@@ -486,30 +472,29 @@ int addElement(Queue *queue, Node *info)
   queue->buffer[queue->rear] = info;
   queue->size++;
 
-  result = pthread_mutex_unlock(&queue->lock);
-  if (result != 0)
-  {
-    printf("ERROR: could not release lock on mutex\n");
-    return 0; // fail
-  }
+  // result = pthread_mutex_unlock(&queue->lock);
+  // if (result != 0)
+  // {
+  //   printf("ERROR: could not release lock on mutex\n");
+  //   return 0; // fail
+  // }
 
   return 1; // success
 }
 
-
-// get last inserted node from queue
 Node *getElement(Queue *queue)
 {
 
-  int result = pthread_mutex_lock(&queue->lock);
-  if (result != 0)
-  {
-    printf("ERROR: could not acquire lock on mutex\n");
-    return ((void *)0);
-  }
+  // int result = pthread_mutex_lock(&queue->lock);
+  // if (result != 0)
+  // {
+  //   printf("ERROR: could not acquire lock on mutex\n");
+  //   return ((void *)0);
+  // }
 
   if (isEmpty(queue))
   {
+    //pthread_mutex_unlock(&queue->lock);
     return ((void *)0);
   }
 
@@ -517,12 +502,12 @@ Node *getElement(Queue *queue)
   Node *element = queue->buffer[queue->front];
   queue->size--;
 
-  result = pthread_mutex_unlock(&queue->lock);
-  if (result != 0)
-  {
-    printf("ERROR: could not release lock on mutex\n");
-    return ((void *)0);
-  }
+  // result = pthread_mutex_unlock(&queue->lock);
+  // if (result != 0)
+  // {
+  //   printf("ERROR: could not release lock on mutex\n");
+  //   return ((void *)0);
+  // }
 
   return element;
 }
@@ -543,6 +528,55 @@ typedef struct param_cons
   int done;
 } param_cons;
 
+// void* thread_read_airports_data(void *arg){
+//     struct parametres *par = (struct parametres *)arg;
+//     FILE *fp = par->fp;
+//     int **num_flights = par->num_flights;
+//     char **airports = par->airports;
+
+//     char origin[STR_CODE_AIRPORT], destination[STR_CODE_AIRPORT];
+//     int invalid, index_origin, index_destination;
+//     char** line = (char **) malloc_matrix(N_BLOCK, MAXCHAR, sizeof(char));
+//     int i;
+
+//     while (1){
+
+//       //printids("nou fil: ");
+//       int readblock = 0;
+//       pthread_mutex_lock(&mutex);
+//       while (readblock < N_BLOCK){
+//         fgets(line[readblock]  printf("queue: front %d, rear: %d, size %d\n", queue->front, queue->rear, queue->size);
+//       }
+//       pthread_mutex_unlock(&mutex);
+//       readblock = N_BLOCK;
+
+//       for(i = 0; i<N_BLOCK; i++){
+
+//         invalid = extract_fields_airport(origin, destination, line[i]);
+
+//           if (!invalid) {
+//             index_origin = get_index_airport(origin, airports);
+//             index_destination = get_index_airport(destination, airports);
+
+//             if ((index_origin >= 0) && (index_destination >= 0)){
+//               pthread_mutex_lock(&mutex);
+//               num_flights[index  printf("queue: front %d, rear: %d, size %d\n", queue->front, queue->rear, queue->size);lock(&mutex);
+//             }
+//           }
+
+//         readblock--;
+//       }
+
+// //       if(feof(fp)){
+// //         break;
+//       }
+
+//     }
+
+//     free_matrix((void **) line, N_BLOCK);
+
+//     return ((void *)0);
+// }
 
 void *productor(void *arg)
 {
@@ -555,50 +589,50 @@ void *productor(void *arg)
   while (1)
   {
 
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&queue->lock);
 
     while (isFull(queue))
     {
-      // if queue is full, produce waiting threads
-      pthread_cond_wait(&prod, &mutex);
+      pthread_cond_wait(&queue->full, &queue->lock);
     }
 
-    // create new node for queue
+    if (par->done){
+      pthread_mutex_unlock(&queue->lock);
+      return ((void *)0);
+    }
+
     Node *temp = CreateNode();
 
     while (temp->nelems < N_BLOCK && !feof(fp))
     {
-      // put information into node 
       fgets(temp->lines[temp->nelems], MAXCHAR, fp);
       temp->nelems++;
     }
 
-    // add new node to queue
     addElement(queue, temp);
 
-    // now queue isn't empty, call consumer to consume
-    pthread_cond_signal(&cons);
-    pthread_mutex_unlock(&mutex);
+    // printids("productor nou fil: ");
 
-    if (feof(fp))
-    {
-      // if file is over, call consuemr, and set queue to finish
-      queue->finish = 1;
-      pthread_cond_signal(&cons);
-      pthread_mutex_unlock(&mutex);
-      return ((void *)0);
-      ;
-    }
+    pthread_cond_signal(&queue->empty);
+    pthread_mutex_unlock(&queue->lock);
+
+        if (feof(fp))
+        {
+            par->done = 1;
+            pthread_cond_signal(&queue->full);
+            return ((void *)0);
+        }
   }
+
 
   return ((void *)0);
 }
-
 
 void *consumidor(void *arg)
 {
 
   param_cons *par = (struct param_cons *)arg;
+  FILE *fp2 = par->fp2;
   int **num_flights = par->num_flights;
   char **airports = par->airports;
   Queue *queue = par->queue;
@@ -609,58 +643,46 @@ void *consumidor(void *arg)
   while (1)
   {
 
-    if (queue->finish && isEmpty(queue))
-    {
-      // if queue is finish and queue is empty it means all data has been written
-      return ((void *)0);
+
+    pthread_mutex_lock(&queue->lock);
+
+    while (isEmpty(queue) && !par->done) {
+      pthread_cond_wait(&queue->empty, &queue->lock);
     }
 
-    pthread_mutex_lock(&mutex);
+            if (par->done)
+        {
+            pthread_mutex_unlock(&queue->lock);
+            return ((void *)0);
+        }
 
-
-    while (isEmpty(queue))
-    {
-      if (queue->finish && isEmpty(queue))
-      {
-        pthread_mutex_unlock(&mutex);
-        return ((void *)0);
-      }
-
-      // if queue is empty, consumer waiting for producer to produce information
-      pthread_cond_wait(&cons, &mutex);
-    }
-
-    // get information from queue
     Node *temp = getElement(queue);
 
+    // printids("consum nou fil: ");
 
-    for (int i = 0; i < temp->nelems; i++)
-    {
-      // update information on num_flights
+    for (int i = 0; i < temp->nelems; i++) {
+
       invalid = extract_fields_airport(origin, destination, temp->lines[i]);
 
-      if (!invalid)
-      {
+      if (!invalid) {
         index_origin = get_index_airport(origin, airports);
         index_destination = get_index_airport(destination, airports);
 
-        if ((index_origin >= 0) && (index_destination >= 0))
-        {
+        if ((index_origin >= 0) && (index_destination >= 0)) {
           num_flights[index_origin][index_destination]++;
         }
       }
     }
 
-    // for now, queue isn't empty, call producer to produce information
-    pthread_cond_signal(&prod);
-    pthread_mutex_unlock(&mutex);
+    pthread_cond_signal(&queue->full);
+    pthread_mutex_unlock(&queue->lock);
 
-    if (queue->finish && isEmpty(queue))
-    {
-      // if queue is finish and queue is empty it means all data has been written, queit thread
-      pthread_mutex_unlock(&mutex);
-      break;
+    if (feof(fp2)) {
+                  par->done = 1;
+            pthread_cond_signal(&queue->empty);
+            break;
     }
+
   }
 
   return ((void *)0);
@@ -701,17 +723,27 @@ void read_airports_data(int **num_flights, char **airports, char *fname)
   {
     par_prod[i].fp = fp;
     par_prod[i].queue = queue;
+    par_prod[i].done = 0;
     pthread_create(ntid_prod + i, NULL, productor, (void *)&par_prod[i]);
+    if (pthread_create(&ntid_prod[i], NULL, productor, &par_prod[i]) != 0){
+    perror("pthread_create (productor)");
+      exit(1);
+    }
   }
 
   // thread consumidor
   for (i = 0; i < NUM_FILS_CONSUMIDOR; i++)
   {
-
+    par_cons[i].fp2 = fp;
     par_cons[i].num_flights = num_flights;
     par_cons[i].airports = airports;
     par_cons[i].queue = queue;
+    par_cons[i].done = 0;
     pthread_create(ntid_cons + i, NULL, consumidor, (void *)&par_cons[i]);
+    if (pthread_create(&ntid_cons[i], NULL, consumidor, &par_cons[i]) != 0){
+      printf("pthread_create (consumidor)");
+      exit(1);
+    }
   }
 
   for (i = 0; i < NUM_FILS_PRODUCTOR; i++)
@@ -742,13 +774,16 @@ void read_airports_data(int **num_flights, char **airports, char *fname)
 int main(int argc, char **argv)
 {
   char **airports;
-  int **num_flights;
+  int **num_flights;  
 
-  if (argc != 3)
-  {
-    printf("%s <airport.csv> <flights.csv>\n", argv[0]);
-    exit(1);
-  }
+  argv[1] = "aeroports.csv";
+  argv[2] = "fitxer_petit.csv";
+
+  // if (argc != 3)
+  // {
+  //   printf("%s <airport.csv> <flights.csv>\n", argv[0]);
+  //   exit(1);
+  // }
 
   struct timeval tv1, tv2;
 
