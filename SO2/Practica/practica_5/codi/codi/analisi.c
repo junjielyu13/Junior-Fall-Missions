@@ -285,14 +285,17 @@ void printids(const char *s)
   printf("%s pid %u tid %u (0x%x)\n", s, (unsigned int)pid, (unsigned int)tid, (unsigned int)tid);
 }
 
-typedef struct Node
-{
+
+typedef struct Node {
   char **lines;
   int nelems;
 } Node;
 
+
+// create a new Node
 Node *CreateNode()
 {
+
 
   Node *node = malloc(sizeof(Node));
   if (!node)
@@ -328,6 +331,7 @@ Node *CreateNode()
   return node;
 }
 
+//  Destory node 
 void DestroyNode(Node *node)
 {
   int i;
@@ -351,6 +355,7 @@ typedef struct Queue
   pthread_mutex_t lock;
 } Queue;
 
+// create a queue for buffer 
 Queue *CreateQueue()
 {
 
@@ -373,7 +378,6 @@ Queue *CreateQueue()
 
   for (i = 0; i < B_BUFFER; i++)
   {
-    // queue->buffer[i] = CreateNode();
     queue->buffer[i] = malloc(sizeof(Node *));
     if (!queue->buffer[i])
     {
@@ -427,6 +431,7 @@ Queue *CreateQueue()
   return queue;
 }
 
+// destroy queue
 void DestroyQueue(Queue *queue)
 {
 
@@ -452,12 +457,13 @@ int isFull(Queue *queue)
 {
   return (queue->size == queue->capacity);
 }
-
+ 
 int isEmpty(Queue *queue)
 {
   return (queue->size == 0);
 }
 
+// insert node into queue
 int addElement(Queue *queue, Node *info)
 {
 
@@ -490,6 +496,8 @@ int addElement(Queue *queue, Node *info)
   return 1; // success
 }
 
+
+// get last inserted node from queue
 Node *getElement(Queue *queue)
 {
 
@@ -536,7 +544,6 @@ typedef struct param_cons
 } param_cons;
 
 
-
 void *productor(void *arg)
 {
 
@@ -552,25 +559,30 @@ void *productor(void *arg)
 
     while (isFull(queue))
     {
+      // if queue is full, produce waiting threads
       pthread_cond_wait(&prod, &mutex);
     }
 
-
+    // create new node for queue
     Node *temp = CreateNode();
 
     while (temp->nelems < N_BLOCK && !feof(fp))
     {
+      // put information into node 
       fgets(temp->lines[temp->nelems], MAXCHAR, fp);
       temp->nelems++;
     }
 
+    // add new node to queue
     addElement(queue, temp);
 
+    // now queue isn't empty, call consumer to consume
     pthread_cond_signal(&cons);
     pthread_mutex_unlock(&mutex);
 
     if (feof(fp))
     {
+      // if file is over, call consuemr, and set queue to finish
       queue->finish = 1;
       pthread_cond_signal(&cons);
       pthread_mutex_unlock(&mutex);
@@ -599,6 +611,7 @@ void *consumidor(void *arg)
 
     if (queue->finish && isEmpty(queue))
     {
+      // if queue is finish and queue is empty it means all data has been written
       return ((void *)0);
     }
 
@@ -613,16 +626,17 @@ void *consumidor(void *arg)
         return ((void *)0);
       }
 
+      // if queue is empty, consumer waiting for producer to produce information
       pthread_cond_wait(&cons, &mutex);
     }
 
-
+    // get information from queue
     Node *temp = getElement(queue);
 
 
     for (int i = 0; i < temp->nelems; i++)
     {
-
+      // update information on num_flights
       invalid = extract_fields_airport(origin, destination, temp->lines[i]);
 
       if (!invalid)
@@ -637,12 +651,13 @@ void *consumidor(void *arg)
       }
     }
 
-
+    // for now, queue isn't empty, call producer to produce information
     pthread_cond_signal(&prod);
     pthread_mutex_unlock(&mutex);
 
     if (queue->finish && isEmpty(queue))
     {
+      // if queue is finish and queue is empty it means all data has been written, queit thread
       pthread_mutex_unlock(&mutex);
       break;
     }
