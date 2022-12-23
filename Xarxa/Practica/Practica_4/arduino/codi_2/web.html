@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>ESP8266_Junjie Web Server</title>
+    <style>
+        *{ margin: 0;}
+        body{font-size: 16;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
+        .container{margin: 0 auto;width: 80%;}
+        .header{margin: 0 auto; width: 100%; height: 50px; background-color: #2f7eb2;}
+        .header-item-pos{ padding-top: 10px; padding-left: 10%; width: 100%;}
+        .header-item-pos a{display: inline-block;width: 160px;text-decoration: none;text-align: left;font-size: 18px;font-weight: 500;color: #fff;}  
+        .title{margin: 40px auto;width: 100%;text-align: center;font-size: 28px;font-weight: 700;}
+        .main-title{font-size: 30px;}
+        .sub-title{font-size: 32px;}
+        .description{margin: 0 auto;width: 80%;font-size: 20px;}
+        .main{margin: 40px auto;text-align: center;height: 300px;}
+        .top,.bottom{margin: 0 auto;width: 90%;height: 200px;}
+        .top-left,.top-right,.bottom-left,.bottom-right{width: 270px;height: 80px;line-height: 80px;background-color: #46bc79;text-align: center;border-radius: 40px;}
+        .top-left a,.top-right a,.bottom-left a,.bottom-right a{text-decoration: none;color: #fff;font-size: 20px;font-weight: 600;}
+        .footer{width: 100%;height: 50px;background-color: #333;}
+        .footer-pos{padding-top: 11px;width: 80%;padding-left:  10%;color: #fff;font-size: 14px;font-weight: 200;}
+        .footer-left{float: left;}
+        .footer-left a{text-decoration: none;color: #fff;}
+        .footer-right{float: right;}
+    </style>
+</head>
+
+
+<body>
+
+    <div class='header'>
+        <div class='header-item-pos'>
+            <a href='https://thingspeak.com/'>ThingSpeak</a>
+            <a href='https://www.generationrobots.com/media/adafruit-feather-huzzah-esp8266-user-guide-tutorial.pdf'>ESP8266</a>
+            <a href='https://www.dfrobot.com/product-2065.html'>CCS811 Air Quality</a>
+        </div>
+    </div>
+
+
+    <div class='container'>        
+        <div class='title'>
+            <p class='main-title'>ESP8266 + CCS811 Air Quality + ThingSpeak</p>
+            <p class='sub-title'>Web Server </p>
+        </div>
+
+        <div class='description'>
+            Aquest lloc web està creat amb ESP8266, podeu utilitzar ESP8266 i CCS811 Air Quality per mesurar dades i enviar-les al lloc web de ThingSpeak: 
+            <a href='https://thingspeak.com/channels/1991175'>Aquí.</a> 
+        </div>
+
+        
+        <div class='main'>
+            <div class='top'>
+                <div class='top-left' style='float: left;'><a href='1'><div>GET RSSI</div></a></div>
+                <div class='top-right' style='float: right;'><a href='2'><div>GET Clear Air baselines numbers</div></a></div>
+            </div>
+            <div class='bottom'>
+                <div class='bottom-left' style='float: left;'><a href='3'><div>GET CO2(ppm)</div></a></div>
+                <div class='bottom-right' style='float: right;'><a href='4'><div>GET TVOC(ppb)</div></a></div>
+            </div>
+        </div>
+
+    
+    </div>
+
+    <div class='footer'>
+        <div class='footer-pos'>
+            <div class='footer-left'>Autors:
+                <a href='https://github.com/junjielyu13'>@Junjie Li,</a> 
+                <a href='https://github.com/TheExorcit'>@Manuel Liu Wang.</a>
+            </div>
+            <div class='footer-right'>©2022 Xarxa, UB.</div>
+        </div>
+    </div>
+
+
+</body>
+</html>
