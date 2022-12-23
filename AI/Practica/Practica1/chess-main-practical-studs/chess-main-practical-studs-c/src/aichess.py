@@ -175,7 +175,12 @@ class Aichess():
 
 
 
-
+    def setify(self, states):
+        setStates = set()
+        for state in states:
+            tup = tuple(state)
+            setStates.add(tup)
+        return setStates
     def DepthFirstSearch(self, currentState, depth):
         '''
         Depth First Search
@@ -380,7 +385,8 @@ if __name__ == "__main__":
     # TA[0][4] = 12
 
     TA[7][0] = 2
-    TA[7][4] = 6
+    #TA[7][4] = 6
+    TA[7][7] = 6
     TA[0][4] = 12
     #TA[0][0] = 8
 
@@ -421,50 +427,50 @@ if __name__ == "__main__":
 
 
 
-    '''
-        BFS TEST
-    '''
-    print("\n\nstating BFS ... ")
-    aichess_BFS.chess.boardSim.print_board()
+    # '''
+    #     BFS TEST
+    # '''
+    # print("\n\nstating BFS ... ")
+    # aichess_BFS.chess.boardSim.print_board()
 
-    start = time.time()
-    aichess_BFS.BreadthFirstSearch(currentState)
-    end = time.time()
+    # start = time.time()
+    # aichess_BFS.BreadthFirstSearch(currentState)
+    # end = time.time()
 
-    print("#Move sequence...  ", aichess_BFS.pathToTarget)
-    print("#Visited sequence...  ", aichess_BFS.listVisitedStates)
-    print("#Current State...  ", aichess_BFS.chess.board.currentStateW)
+    # print("#Move sequence...  ", aichess_BFS.pathToTarget)
+    # print("#Visited sequence...  ", aichess_BFS.listVisitedStates)
+    # print("#Current State...  ", aichess_BFS.chess.board.currentStateW)
 
-    startState = aichess_BFS.pathToTarget[0]
-    path = aichess_BFS.pathToTarget[1:]
-    for nextState in path:
-        movePiece(aichess_BFS, startState, nextState)
-        startState = nextState
-        aichess_BFS.chess.board.print_board()
-    print("BFS = ", end - start, "s")
+    # startState = aichess_BFS.pathToTarget[0]
+    # path = aichess_BFS.pathToTarget[1:]
+    # for nextState in path:
+    #     movePiece(aichess_BFS, startState, nextState)
+    #     startState = nextState
+    #     aichess_BFS.chess.board.print_board()
+    # print("BFS = ", end - start, "s")
     
 
 
 
 
-    '''
-        A* SEARCH TEST
-    '''
-    print("\n\nstating A* SEARCH ... ")
-    aichess_ASTAR.chess.board.print_board()
+    # '''
+    #     A* SEARCH TEST
+    # '''
+    # print("\n\nstating A* SEARCH ... ")
+    # aichess_ASTAR.chess.board.print_board()
 
-    start = time.time()
-    aichess_ASTAR.AStarSearch(currentState)
-    end = time.time()
+    # start = time.time()
+    # aichess_ASTAR.AStarSearch(currentState)
+    # end = time.time()
 
-    print("#Move sequence...  ", aichess_ASTAR.pathToTarget)
-    print("#Visited sequence...  ", aichess_ASTAR.listVisitedStates)
-    print("#Current State...  ", aichess_ASTAR.chess.board.currentStateW)
+    # print("#Move sequence...  ", aichess_ASTAR.pathToTarget)
+    # print("#Visited sequence...  ", aichess_ASTAR.listVisitedStates)
+    # print("#Current State...  ", aichess_ASTAR.chess.board.currentStateW)
 
-    startState = aichess_ASTAR.pathToTarget[0]
-    path = aichess_ASTAR.pathToTarget[1:]
-    for nextState in path:
-        movePiece(aichess_ASTAR, startState, nextState)
-        startState = nextState
-        aichess_ASTAR.chess.board.print_board()
-    print("A* star = ", end - start, "s")
+    # startState = aichess_ASTAR.pathToTarget[0]
+    # path = aichess_ASTAR.pathToTarget[1:]
+    # for nextState in path:
+    #     movePiece(aichess_ASTAR, startState, nextState)
+    #     startState = nextState
+    #     aichess_ASTAR.chess.board.print_board()
+    # print("A* star = ", end - start, "s")
