@@ -115,7 +115,7 @@ void loop() {
     Serial.println("Data is not ready!");
   }
 
-writeTSData(channelID);  
+  writeTSData(channelID);
 
   Serial.println("*********************************");
   // wait a bit before scanning again
@@ -147,8 +147,8 @@ void connectToWiFi(const char* ssid, const char* password) {
 }
 
 
-// int writeTSData(long TSChannel, unsigned int TSField, float data) { 
-int writeTSData(long TSChannel) { 
+// int writeTSData(long TSChannel, unsigned int TSField, float data) {
+int writeTSData(long TSChannel) {
   // Write the data to the channel
   // int writeSuccess = ThingSpeak.writeField(TSChannel, TSField, data, writeAPIKey);
   int writeSuccess = ThingSpeak.writeFields(TSChannel, writeAPIKey);
