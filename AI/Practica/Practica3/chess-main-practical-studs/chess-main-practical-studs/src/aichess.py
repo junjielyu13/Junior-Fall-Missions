@@ -1264,7 +1264,7 @@ class Aichess():
             qTarget = reword
         else:
             qTarget = reword + self.gamma * max(self.qTable[str(nextState)].values())
-
+        
         # update qTable
         self.qTable[str(state)][str(action)] += self.lr * (qTarget - qPredict)
 
